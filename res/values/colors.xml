@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="information_text">#FFCCCCCC</color>
+    <color name="frame_shape_background">#CC444444</color>
+    <color name="frame_shape_stroke">#88333333</color>
+</resources>

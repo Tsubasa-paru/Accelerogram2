@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Accelerogram2</string>
+    <string name="filename">File Name</string>
+    <string name="nickname">Nickname</string>
+    <string name="commander_handle">Commander Handle</string>
+    <string name="btn_rec">Rec Button</string>
+    <string name="btn_replay">Replay Button</string>
+    <string name="btn_pause">Pause Button</string>
+    <string name="btn_graphmode">Toggle GraphMode</string>
+    <string name="btn_calibration">Calibration</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_comment">Edit Comment</string>
+    <string name="menu_username">Select User</string>
+    <string name="menu_togglemap">Toggle Map</string>
+    <string name="menu_file">File</string>
+    <string name="menu_save">Save</string>
+    <string name="menu_load">Load</string>
+    <string name="menu_file_edit">Edit</string>
+    <string name="menu_rename">Rename</string>
+    <string name="menu_delete">Delete</string>
+
+</resources>

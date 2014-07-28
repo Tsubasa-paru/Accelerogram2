@@ -1,0 +1,93 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="jp.a34910.android.accelerogram2.MainActivity$PlaceholderFragment" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <jp.a34910.android.accelerogram2.SurfaceGraph
+            android:id="@+id/surfaceGraph"
+            android:layout_width="match_parent"
+            android:layout_height="160dp" />
+
+        <jp.a34910.android.accelerogram2.SurfaceCursor
+            android:id="@+id/surfaceCursor"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+	</LinearLayout>
+
+	<WebView
+        android:id="@+id/map_view"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/frame_shape" />
+
+	<ImageButton
+	    android:id="@+id/calibration_btn"
+	    android:layout_width="70dp"
+	    android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:contentDescription="@string/btn_calibration"
+	    android:src="@drawable/ic_calibration" />
+
+    <LinearLayout
+        android:id="@+id/commander_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:background="@drawable/frame_shape" >
+
+        <ImageButton
+            android:id="@+id/rec_btn"
+            android:layout_width="70dp"
+            android:layout_height="50dp"
+            android:layout_marginRight="5dp"
+            android:contentDescription="@string/btn_rec"
+            android:src="@drawable/ic_rec" />
+
+        <ImageButton
+            android:id="@+id/replay_btn"
+            android:layout_width="70dp"
+            android:layout_height="50dp"
+            android:layout_marginRight="5dp"
+            android:contentDescription="@string/btn_replay"
+            android:src="@drawable/ic_replay" />
+
+        <ImageButton
+            android:id="@+id/stop_btn"
+            android:layout_width="70dp"
+            android:layout_height="50dp"
+            android:layout_marginRight="5dp"
+            android:contentDescription="@string/btn_pause"
+            android:src="@drawable/ic_stop" />
+
+    	<ImageButton
+        	android:id="@+id/gmode_btn"
+        	android:layout_width="70dp"
+        	android:layout_height="50dp"
+	        android:layout_marginRight="5dp"
+        	android:contentDescription="@string/btn_graphmode"
+        	android:src="@drawable/ic_graphmode" />
+
+    	<ImageView
+            android:id="@+id/commander_handle"
+            android:layout_width="32dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/commander_handle"
+            android:src="@drawable/ic_commander_handle"/>
+
+	</LinearLayout>
+</RelativeLayout>

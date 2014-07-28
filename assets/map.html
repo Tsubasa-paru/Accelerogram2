@@ -1,0 +1,34 @@
+<html>
+<head>
+<title>Map</title>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript">
+	var mMap;
+	var mMarker;
+	function initialize() {
+		var defaultLatLng = new google.maps.LatLng(35.680865, 139.767036);
+		var defaultOptions = {
+			zoom: 17,
+			center: defaultLatLng,
+			mapTypeId: google.maps.MapTypeId.ROADMAP,
+			disableDefaultUI: true
+		};
+		mMap = new google.maps.Map(document.getElementById("map_canvas"), defaultOptions);
+		mMarker = new google.maps.Marker({
+			position: defaultLatLng,
+			map: mMap,
+		});
+	}
+
+	function moveTo(latitude, longitude) {
+		var newLatLng = new google.maps.LatLng(latitude, longitude);
+		mMap.panTo(newLatLng);
+		mMarker.setOptions({position: newLatLng, map: mMap});
+	}
+</script>
+</head>
+<body onload="initialize()">
+<div id="map_canvas" style="width:100%; height:100%"></div>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="jp.a34910.android.accelerogram2.MainActivity" >
+
+	<item
+	    android:id="@+id/action_settings"
+	    android:title="@string/menu_settings"
+	    android:icon="@android:drawable/ic_menu_preferences"
+	    android:orderInCategory="100"
+	    app:showAsAction="always">
+	    <menu>
+	        <item
+	            android:id="@+id/action_comment"
+	            android:title="@string/menu_comment"
+	            android:orderInCategory="101"
+	            app:showAsAction="always" />
+	    </menu>
+
+	</item>
+
+	<item
+        android:id="@+id/action_username"
+        android:title="@string/menu_username"
+        android:icon="@drawable/ic_user"
+        android:orderInCategory="110"
+        app:showAsAction="always" />
+
+	<item
+        android:id="@+id/action_togglemap"
+        android:title="@string/menu_togglemap"
+        android:icon="@android:drawable/ic_menu_mylocation"
+        android:orderInCategory="120"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/file_menu"
+        android:title="@string/menu_file"
+        android:icon="@android:drawable/ic_menu_save"
+        android:orderInCategory="200"
+        app:showAsAction="always">
+        <menu>
+		    <item
+		        android:id="@+id/action_save"
+		        android:title="@string/menu_save"
+		        android:orderInCategory="201"
+		        app:showAsAction="always" />
+		    <item
+		        android:id="@+id/action_load"
+		        android:title="@string/menu_load"
+		        android:orderInCategory="202"
+		        app:showAsAction="always" />
+		    <item
+		        android:id="@+id/file_edit_menu"
+		        android:title="@string/menu_file_edit"
+		        android:orderInCategory="210">
+		        <menu>
+			        <item
+			            android:id="@+id/action_rename"
+			            android:title="@string/menu_rename"
+			            android:orderInCategory="211" />
+			        <item
+			            android:id="@+id/action_delete"
+			            android:title="@string/menu_delete"
+			            android:orderInCategory="212" />
+		        </menu>
+		    </item>
+		</menu>
+	</item>
+</menu>
