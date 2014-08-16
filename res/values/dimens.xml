@@ -5,5 +5,7 @@
     <dimen name="activity_vertical_margin">0dp</dimen>
     <dimen name="webview_width">150dp</dimen>
     <dimen name="webview_height">150dp</dimen>
+    <dimen name="imagebtn_width">60dp</dimen>
+    <dimen name="imagebtn_height">45dp</dimen>
 
 </resources>

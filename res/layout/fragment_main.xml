@@ -36,8 +36,8 @@
 
 	<ImageButton
 	    android:id="@+id/calibration_btn"
-	    android:layout_width="70dp"
-	    android:layout_height="50dp"
+	    android:layout_width="@dimen/imagebtn_width"
+	    android:layout_height="@dimen/imagebtn_height"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:contentDescription="@string/btn_calibration"
@@ -52,32 +52,32 @@
 
         <ImageButton
             android:id="@+id/rec_btn"
-            android:layout_width="70dp"
-            android:layout_height="50dp"
+            android:layout_width="@dimen/imagebtn_width"
+            android:layout_height="@dimen/imagebtn_height"
             android:layout_marginRight="5dp"
             android:contentDescription="@string/btn_rec"
             android:src="@drawable/ic_rec" />
 
         <ImageButton
             android:id="@+id/replay_btn"
-            android:layout_width="70dp"
-            android:layout_height="50dp"
+            android:layout_width="@dimen/imagebtn_width"
+            android:layout_height="@dimen/imagebtn_height"
             android:layout_marginRight="5dp"
             android:contentDescription="@string/btn_replay"
             android:src="@drawable/ic_replay" />
 
         <ImageButton
             android:id="@+id/stop_btn"
-            android:layout_width="70dp"
-            android:layout_height="50dp"
+            android:layout_width="@dimen/imagebtn_width"
+            android:layout_height="@dimen/imagebtn_height"
             android:layout_marginRight="5dp"
             android:contentDescription="@string/btn_pause"
             android:src="@drawable/ic_stop" />
 
     	<ImageButton
         	android:id="@+id/gmode_btn"
-        	android:layout_width="70dp"
-        	android:layout_height="50dp"
+            android:layout_width="@dimen/imagebtn_width"
+            android:layout_height="@dimen/imagebtn_height"
 	        android:layout_marginRight="5dp"
         	android:contentDescription="@string/btn_graphmode"
         	android:src="@drawable/ic_graphmode" />
