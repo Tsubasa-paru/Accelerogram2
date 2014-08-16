@@ -231,8 +231,6 @@ public class SurfaceCursor extends SurfaceView implements SurfaceHolder.Callback
 	 */
 	private class DrawSurfaceTask extends PeriodicTask {
 		private final float STROKE = 1.5f;
-		private final float FONTSIZE = 48.0f;
-		private final int TIMESTAMP_HEIGHT = 50;
 		private Paint axisPaint;
 		private Paint latticePaint;
 		private Paint circlePaint;
@@ -315,7 +313,7 @@ public class SurfaceCursor extends SurfaceView implements SurfaceHolder.Callback
 		private void drawBackground() {
 			float step = mStep * mZoom;
 			int indexMax = (int) (12 * (1 / mZoom));
-			textPaint.setTextSize(32);
+			textPaint.setTextSize(mWidth / 40);
 			switch (mCursorBackground) {
 			case SQUARE:
 				mCursorCanvas.drawColor(Color.LTGRAY);
@@ -429,12 +427,14 @@ public class SurfaceCursor extends SurfaceView implements SurfaceHolder.Callback
 		 * @param top 描画位置の上端
 		 */
 		private void drawInformationText(float top) {
+			final float fontsize = mWidth / 25;
+			final float frame_height = fontsize + (STROKE * 2);
 			final float frame_left = 0.0f;
-			final float frame_top = top;
 			final float frame_right = mWidth;
-			float frame_bottom = TIMESTAMP_HEIGHT;
+			final float frame_top = top;
+			float frame_bottom = top + frame_height;
 			final float text_x = frame_left + STROKE;
-			float text_y = frame_bottom - STROKE * 4;
+			float text_y = frame_bottom - (STROKE * 4);
 			StringBuilder draw_text = new StringBuilder(mTimestamp + "\t" + mUserName + "\t");
 			if (mGsensorData.getSize() > 0) {
 				if (mGsensorData.isSaved) {
@@ -444,14 +444,14 @@ public class SurfaceCursor extends SurfaceView implements SurfaceHolder.Callback
 				}
 			}
 			if (mComment.length() > 0) {
-				frame_bottom = TIMESTAMP_HEIGHT * 2;
+				frame_bottom = top + (frame_height * 2);
 			}
 			mCursorCanvas.drawRect(frame_left, frame_top, frame_right, frame_bottom, framePaint);
 
-			textPaint.setTextSize(FONTSIZE);
+			textPaint.setTextSize(fontsize);
 			mCursorCanvas.drawText(draw_text.toString(), text_x, text_y, textPaint);
 			if (mComment.length() > 0) {
-				text_y = frame_bottom - STROKE * 4;
+				text_y = frame_bottom - (STROKE * 4);
 				mCursorCanvas.drawText(mComment, text_x, text_y, textPaint);
 			}
 		}
