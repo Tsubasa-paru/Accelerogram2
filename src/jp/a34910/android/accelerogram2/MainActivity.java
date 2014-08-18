@@ -325,6 +325,9 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 					mForcusCompareFlag = false;
 					mSurfaceCursor.setGsensorData(mGsensorData);
 					mSensorRecordTask.setPosition((int)(mSensorRecordTask.getPosition() + positionAdjust));
+					if (mCompareSensorTask != null) {
+						mCompareSensorTask.setPosition((int)(mCompareSensorTask.getPosition() + positionAdjust));
+					}
 				}
 			} else if (mCompareSensorTask != null && mCompareGraph != null && view == mCompareGraph) {
 				if (mStatus == Status.PAUSE) {
