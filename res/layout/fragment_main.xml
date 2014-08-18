@@ -82,12 +82,9 @@
         	android:contentDescription="@string/btn_graphmode"
         	android:src="@drawable/ic_graphmode" />
 
-    	<ImageView
-            android:id="@+id/commander_handle"
-            android:layout_width="32dp"
-            android:layout_height="48dp"
-            android:contentDescription="@string/commander_handle"
-            android:src="@drawable/ic_commander_handle"/>
+       <Space
+            android:layout_width="40dp"
+            android:layout_height="match_parent" />
 
 	</LinearLayout>
 </RelativeLayout>
