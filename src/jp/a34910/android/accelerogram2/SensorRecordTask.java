@@ -40,6 +40,8 @@ public class SensorRecordTask extends PeriodicTask implements SensorEventListene
 	private Location mReplayLocation;
 	private long mCount1sec = 0;
 	private long mCount1secMax;
+	private SurfaceCursor mSurfaceCursor = null;
+	private SurfaceGraph mSurfaceGraph = null;
 
 	public SensorRecordTask(SensorListener listener) {
 		super(PERIOD);
@@ -63,6 +65,8 @@ public class SensorRecordTask extends PeriodicTask implements SensorEventListene
 		this.mLPFilter = new LPFilter(mPeriod);
 		this.mLPFilter.setFcutoff(1.0f);
 		this.mCount1secMax = 1000 / mPeriod;
+		this.mSurfaceCursor = null;
+		this.mSurfaceGraph = null;
 	}
 
 	/**
@@ -71,6 +75,24 @@ public class SensorRecordTask extends PeriodicTask implements SensorEventListene
 	 */
 	public GsensorData getGsensorData() {
 		return this.mGsensorData;
+	}
+
+	/**
+	 * カーソル表示画面を設定
+	 * @param sfCursor カーソル表示のSurfaceView
+	 */
+	public void setSurfaceCursor(SurfaceCursor sfCursor) {
+		this.mSurfaceCursor = sfCursor;
+		this.mSurfaceCursor.setGsensorData(mGsensorData);
+	}
+
+	/**
+	 * グラフ表示画面を設定
+	 * @param sfGraph  グラフ表示のSurfaceView
+	 */
+	public void setSurfaceGraph(SurfaceGraph sfGraph) {
+		this.mSurfaceGraph = sfGraph;
+		this.mSurfaceGraph.setGsensorData(mGsensorData);
 	}
 
 	/**
@@ -137,6 +159,12 @@ public class SensorRecordTask extends PeriodicTask implements SensorEventListene
 			newGsensorData.loadFromXML(zipis);
 			mGsensorData = newGsensorData;
 			mGsensorData.isSaved = true;
+			if (mSurfaceCursor != null) {
+				mSurfaceCursor.setGsensorData(mGsensorData);
+			}
+			if (mSurfaceGraph != null) {
+				mSurfaceGraph.setGsensorData(mGsensorData);
+			}
 			zipis.close();
 			bufferedis.close();
 		} catch (Exception e) {
@@ -206,12 +234,28 @@ public class SensorRecordTask extends PeriodicTask implements SensorEventListene
 			if (mStatus == Status.IDLE) {
 				mGsensorData.setupGsensorData();
 				mGsensorData.setCalibration(mCalibration);
+				if (mSurfaceCursor != null) {
+					mSurfaceCursor.setGsensorData(mGsensorData);
+					mSurfaceCursor.setCursorPosition(mPosition);
+				}
+				if (mSurfaceGraph != null) {
+					mSurfaceGraph.setGsensorData(mGsensorData);
+					mSurfaceGraph.setPosition(mPosition);
+				}
 				mStatus = Status.REC;
 			}
 			break;
 		case REPLAY:
 			if (mStatus == Status.IDLE) {
 				mPosition = 0;
+				if (mSurfaceCursor != null) {
+					mSurfaceCursor.setGsensorData(mGsensorData);
+					mSurfaceCursor.setCursorPosition(mPosition);
+				}
+				if (mSurfaceGraph != null) {
+					mSurfaceGraph.setGsensorData(mGsensorData);
+					mSurfaceGraph.setPosition(mPosition);
+				}
 				mStatus = Status.REPLAY;
 			} else if (mStatus == Status.PAUSE) {
 				mStatus = Status.REPLAY;
@@ -227,6 +271,14 @@ public class SensorRecordTask extends PeriodicTask implements SensorEventListene
 		case IDLE:
 			mStatus = Status.IDLE;
 			mPosition = 0;
+			if (mSurfaceCursor != null) {
+				mSurfaceCursor.setGsensorData(mGsensorData);
+				mSurfaceCursor.setCursorPosition(mPosition);
+			}
+			if (mSurfaceGraph != null) {
+				mSurfaceGraph.setGsensorData(mGsensorData);
+				mSurfaceGraph.setPosition(mPosition);
+			}
 			break;
 		case CALIBRATION:
 			mStatus = Status.CALIBRATION;

@@ -42,7 +42,6 @@ public class SurfaceCursor extends SurfaceView implements SurfaceHolder.Callback
 	private float mZoom = ZOOM_MIN;
 	private boolean mGsensorAlertFlag = false;
 	private boolean mEnableTracsFlag = false;
-	private boolean mStillTracksFlag = false;
 
 	/**
 	 * 描画するカーソルの情報
@@ -184,18 +183,6 @@ public class SurfaceCursor extends SurfaceView implements SurfaceHolder.Callback
 	public boolean enableTracks(boolean enable) {
 		mEnableTracsFlag = enable;
 		return mEnableTracsFlag;
-	}
-
-	/**
-	 * 軌跡表示の一時停止ON/OFFを設定する
-	 * @param still true:一時停止ON / 一時停止OFF
-	 * @return 一時停止の状態
-	 */
-	public boolean stillTracks(boolean still) {
-		if (mEnableTracsFlag) {
-			mStillTracksFlag = still;
-		}
-		return mStillTracksFlag;
 	}
 
 	@Override

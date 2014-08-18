@@ -355,6 +355,8 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		Log.d(TAG, "onResume");
 		super.onResume();
 		mGsensorData = mSensorRecordTask.getGsensorData();
+		mSensorRecordTask.setSurfaceCursor(mSurfaceCursor);
+		mSensorRecordTask.setSurfaceGraph(mSurfaceGraph);
 
 		mGsensorData.setUserName(mUserName);
 		mSurfaceCursor.setGsensorData(mGsensorData);
@@ -453,14 +455,9 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 			mPosition = 0;
 			mGsensorData = mSensorRecordTask.getGsensorData();
 			mGsensorData.setUserName(mUserName);
-			mSurfaceCursor.setCursorPosition(mPosition);
-			mSurfaceCursor.setGsensorData(mGsensorData);
 			mDrawTracksFlag = mSurfaceCursor.enableTracks(true);
-			mSurfaceCursor.stillTracks(false);
 
 			mSurfaceGraph.setGraphAlign(Graph.Align.RIGHT);
-			mSurfaceGraph.setGsensorData(mGsensorData);
-			mSurfaceGraph.setPosition(mPosition);
 			mDrawGraphFlag = mSurfaceGraph.enableDrawGraph(true);
 
 			mRecBtn.setImageBitmap(mButtonsBitmap.rec_red);
@@ -473,14 +470,9 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	private void moveStatusREPLAY() {
 		if ((mStatus = mSensorRecordTask.setStatus(Status.REPLAY)) == Status.REPLAY) {
 			mPosition = 0;
-			mSurfaceCursor.setGsensorData(mGsensorData);
-			mSurfaceCursor.setCursorPosition(mPosition);
 			mDrawTracksFlag = mSurfaceCursor.enableTracks(true);
-			mSurfaceCursor.stillTracks(false);
 
 			mSurfaceGraph.setGraphAlign(Graph.Align.CENTER);
-			mSurfaceGraph.setGsensorData(mGsensorData);
-			mSurfaceGraph.setPosition(mPosition);
 			mDrawGraphFlag = mSurfaceGraph.enableDrawGraph(true);
 
 			mReplayBtn.setImageBitmap(mButtonsBitmap.replay_green);
@@ -493,12 +485,10 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	private void toggleStatusREPLAYorPAUSE() {
 		if (mStatus == Status.REPLAY) {
 			if ((mStatus = mSensorRecordTask.setStatus(Status.PAUSE)) == Status.PAUSE) {
-				mSurfaceCursor.stillTracks(true);
 				mReplayBtn.setImageBitmap(mButtonsBitmap.pause_green);
 			}
 		} else if (mStatus == Status.PAUSE) {
 			if ((mStatus = mSensorRecordTask.setStatus(Status.REPLAY)) == Status.REPLAY) {
-				mSurfaceCursor.stillTracks(false);
 				mReplayBtn.setImageBitmap(mButtonsBitmap.replay_green);
 			}
 		}
@@ -512,14 +502,10 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		SensorRecordTask.Status beforStatus = mStatus;
 		if ((mStatus = mSensorRecordTask.setStatus(Status.IDLE)) == Status.IDLE) {
 			mPosition = 0;
-			mSurfaceCursor.setGsensorData(mGsensorData);
 			mDrawTracksFlag = mSurfaceCursor.enableTracks(false);
-			mSurfaceCursor.stillTracks(false);
-			mSurfaceCursor.setCursorPosition(mPosition);
 			mSurfaceCursor.setTimestamp(mGsensorData.getTimeStamp(mPosition));
 
 			mDrawGraphFlag = mSurfaceGraph.enableDrawGraph(false);
-			mSurfaceGraph.setPosition(mPosition);
 
 			mRecBtn.setImageBitmap(mButtonsBitmap.rec_white);
 			mReplayBtn.setImageBitmap(mButtonsBitmap.replay_white);
@@ -747,13 +733,11 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 				FileIOPostHandler handler = new FileIOPostHandler() {
 					@Override
 					public void onSuccess() {
-						Matcher nicknameMatcher = Pattern.compile("\\[.*\\]").matcher(selected);
-						if (nicknameMatcher.find()) {
-							mUserName = nicknameMatcher.group().replaceAll("[\\[\\]]", "");
+						Matcher usernameMatcher = Pattern.compile("\\[.*\\]").matcher(selected);
+						if (usernameMatcher.find()) {
+							mUserName = usernameMatcher.group().replaceAll("[\\[\\]]", "");
 						}
 						mGsensorData = mSensorRecordTask.getGsensorData();
-						mSurfaceCursor.setGsensorData(mGsensorData);
-						mSurfaceGraph.setGsensorData(mGsensorData);
 						mSurfaceCursor.setTimestamp(mGsensorData.getTimeStamp(0));
 						Toast.makeText(mThisActivity, selected + "から読込ました", Toast.LENGTH_LONG).show();
 					}
