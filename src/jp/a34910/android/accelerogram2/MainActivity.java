@@ -482,6 +482,9 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 			default:
 				break;
 			}
+			if (mCompareGraph != null) {
+				mCompareGraph.setGraphMode(mGraphMode);
+			}
 		}
 	}
 
@@ -498,6 +501,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 			mSurfaceGraph.setGraphAlign(Graph.Align.RIGHT);
 			mDrawGraphFlag = mSurfaceGraph.enableDrawGraph(true);
 
+			mCompareGraph = showCompareGraph(false);
 			mRecBtn.setImageBitmap(mButtonsBitmap.rec_red);
 		}
 	}
@@ -665,22 +669,9 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		case R.id.action_toggle_compare:
 			if (mCompareSensorTask != null) {
 				if (mCompareGraph == null) {
-					mCompareGraph = new SurfaceGraph(mThisActivity);
-					SurfaceViewOnTouchListener compareListener = new SurfaceViewOnTouchListener(mCompareGraph, mOnTouchAction);
-					mCompareGraph.setOnTouchListener(compareListener);
-					mCompareGraph.setGraphAlign(Align.CENTER);
-					mCompareSensorTask.setSurfaceGraph(mCompareGraph);
-					mCompareGraph.setPosition(mCompareSensorTask.getPosition());
-					mCompareGraph.enableDrawGraph(true);
-					mCompareSensorTask.execute();
-					int height = mSurfaceGraph.getHeight();
-					mSurfaceLayout.addView(mCompareGraph, 0, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+					mCompareGraph = showCompareGraph(true);
 				} else {
-					mCompareSensorTask.cancel();
-					mSurfaceLayout.removeAllViews();
-					mSurfaceLayout.addView(mSurfaceGraph);
-					mSurfaceLayout.addView(mSurfaceCursor);
-					mCompareGraph = null;
+					mCompareGraph = showCompareGraph(false);
 				}
 			} else {
 				ConfirmationDialog dialog = new ConfirmationDialog(mThisActivity, "比較データを選択してください", null);
@@ -882,5 +873,36 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		mFileNameList = setupFileNameList(sdcard);
 		NameSelectDialog selectDialog = new NameSelectDialog(mThisActivity, "Select Compare data", mFileNameList, selectedListener);
 		selectDialog.show();
+	}
+
+	/**
+	 * 比較用データグラフ表示のON/OFF
+	 * @param enable 表示許可
+	 * @return 生成したグラフのオブジェクト（表示OFFの場合、比較用データが存在しない場合はnull）を返す
+	 */
+	private SurfaceGraph showCompareGraph(boolean enable) {
+		SurfaceGraph sfg = null;
+		if (mCompareSensorTask != null) {
+			if (enable) {
+				sfg = new SurfaceGraph(mThisActivity);
+				SurfaceViewOnTouchListener compareListener = new SurfaceViewOnTouchListener(sfg, mOnTouchAction);
+				sfg.setOnTouchListener(compareListener);
+				sfg.setGraphAlign(Align.CENTER);
+				sfg.setGraphMode(mGraphMode);
+				mCompareSensorTask.setSurfaceGraph(sfg);
+				sfg.setPosition(mCompareSensorTask.getPosition());
+				sfg.enableDrawGraph(true);
+				mCompareSensorTask.execute();
+				int height = mSurfaceGraph.getHeight();
+				mSurfaceLayout.addView(sfg, 0, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+			} else {
+				mCompareSensorTask.cancel();
+				mSurfaceLayout.removeAllViews();
+				mSurfaceLayout.addView(mSurfaceGraph);
+				mSurfaceLayout.addView(mSurfaceCursor);
+				sfg = null;
+			}
+		}
+		return sfg;
 	}
 }
