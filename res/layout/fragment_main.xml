@@ -9,6 +9,7 @@
     tools:context="jp.a34910.android.accelerogram2.MainActivity$PlaceholderFragment" >
 
     <LinearLayout
+        android:id="@+id/surfaceLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical" >

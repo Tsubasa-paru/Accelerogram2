@@ -8,13 +8,21 @@
 	    android:title="@string/menu_settings"
 	    android:icon="@android:drawable/ic_menu_preferences"
 	    android:orderInCategory="100"
-	    app:showAsAction="always">
+	    app:showAsAction="ifRoom">
 	    <menu>
 	        <item
 	            android:id="@+id/action_comment"
 	            android:title="@string/menu_comment"
-	            android:orderInCategory="101"
-	            app:showAsAction="always" />
+	            android:orderInCategory="101" />
+	        <item
+	            android:id="@+id/action_select_compare"
+	            android:title="@string/menu_select_compare"
+	            android:orderInCategory="102" />
+	        <item
+	            android:id="@+id/action_toggle_compare"
+	            android:title="@string/menu_toggle_compare"
+	            android:orderInCategory="103" />
+
 	    </menu>
 
 	</item>
@@ -38,18 +46,16 @@
         android:title="@string/menu_file"
         android:icon="@android:drawable/ic_menu_save"
         android:orderInCategory="200"
-        app:showAsAction="always">
+        app:showAsAction="ifRoom">
         <menu>
 		    <item
 		        android:id="@+id/action_save"
 		        android:title="@string/menu_save"
-		        android:orderInCategory="201"
-		        app:showAsAction="always" />
+		        android:orderInCategory="201" />
 		    <item
 		        android:id="@+id/action_load"
 		        android:title="@string/menu_load"
-		        android:orderInCategory="202"
-		        app:showAsAction="always" />
+		        android:orderInCategory="202" />
 		    <item
 		        android:id="@+id/file_edit_menu"
 		        android:title="@string/menu_file_edit"

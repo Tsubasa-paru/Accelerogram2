@@ -66,6 +66,8 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	static private WebView mMapView;
 	static private SurfaceCursor mSurfaceCursor;
 	static private SurfaceGraph mSurfaceGraph;
+	static private SurfaceGraph mCompareGraph;
+	static private LinearLayout mSurfaceLayout;
 
 	static private LinearLayout mCommanderView;
 
@@ -85,10 +87,11 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	static private LocationManager mLocationManager = null;
 	private String mProvider;
 
-	private SensorRecordTask mSensorRecordTask;
-	private GsensorData mGsensorData;
+	private SensorRecordTask mSensorRecordTask = null;
+	private GsensorData mGsensorData = null;
 	private SensorRecordTask.Status mStatus = Status.IDLE;
-	private int mPosition = 0;
+	private SensorRecordTask mCompareSensorTask = null;
+	private boolean mForcusCompareFlag = false;
 
 	private float mCursorZoom =3.0f;
 	private float mGraphZoom = 3.0f;
@@ -112,7 +115,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	private SensorRecordTask.SensorListener mSensorListener = new SensorRecordTask.SensorListener() {
 		@Override
 		public void onPeriodicLocation(Location location) {
-			if (mMapViewVisibilityFlag && location != null) {
+			if (!mForcusCompareFlag && mMapViewVisibilityFlag && location != null) {
 				double latitude = location.getLatitude();
 				double longitude = location.getLongitude();
 				mMapView.loadUrl("javascript:moveTo(" + latitude +"," + longitude + ")");
@@ -125,9 +128,10 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 				mSurfaceCursor.setCursorPosition(currentGsensor);
 			}
 			if (mStatus == Status.REPLAY || mStatus == Status.PAUSE) {
-				mPosition = position;
-				mSurfaceCursor.setCursorPosition(position);
-				mSurfaceCursor.setTimestamp(mGsensorData.getTimeStamp(position));
+				if (!mForcusCompareFlag) {
+					mSurfaceCursor.setCursorPosition(position);
+					mSurfaceCursor.setTimestamp(mGsensorData.getTimeStamp(position));
+				}
 				mSurfaceGraph.setPosition(position);
 			} else if (mStatus == Status.REC) {
 				mSurfaceCursor.setCursorPosition(position);
@@ -138,6 +142,31 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 			}
 		}
 	};
+
+	private SensorRecordTask.SensorListener mCompareListener = new SensorRecordTask.SensorListener() {
+		@Override
+		public void onPeriodicLocation(Location location) {
+			if (mForcusCompareFlag && mMapViewVisibilityFlag && location != null) {
+				double latitude = location.getLatitude();
+				double longitude = location.getLongitude();
+				mMapView.loadUrl("javascript:moveTo(" + latitude +"," + longitude + ")");
+//				Log.d(TAG + ":onPeriodicLocation", "latitude:" + latitude + " / logitude:" + longitude);
+			}
+		}
+		@Override
+		public void onPeriodicGsensor(PointF currentGsensor, int position) {
+			if (mStatus == Status.REPLAY || mStatus == Status.PAUSE) {
+				if (mForcusCompareFlag) {
+					mSurfaceCursor.setCursorPosition(position);
+					mSurfaceCursor.setTimestamp(mCompareSensorTask.getGsensorData().getTimeStamp(position));
+				}
+				if (mCompareGraph != null) {
+					mCompareGraph.setPosition(position);
+				}
+			}
+		}
+	};
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -202,6 +231,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 			mCommanderView = (LinearLayout)rootView.findViewById(R.id.commander_layout);
 			mToggleGraphBtn = (ImageButton)rootView.findViewById(R.id.gmode_btn);
 			mMapView = (WebView)rootView.findViewById(R.id.map_view);
+			mSurfaceLayout = (LinearLayout)rootView.findViewById(R.id.surfaceLayout);
 			return rootView;
 		}
 	}
@@ -269,43 +299,42 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	}
 
 	/**
-	 * SurfaceCursorView上をタッチした時に行う画面上の動作を決める
-	 * setZoom:SurfaceCursorView画面の拡大・縮小
+	 * SurfaceView上をタッチした時に行う画面上の動作を決める
+	 * setZoom:SurfaceView画面の拡大・縮小
 	 * movePosition:再生（一時停止）状態なら再生位置を移動する
 	 */
-	private SurfaceViewOnTouchListener.OnTouchAction mCursorOnTouchAction = new SurfaceViewOnTouchListener.OnTouchAction() {
+	private SurfaceViewOnTouchListener.OnTouchAction mOnTouchAction = new SurfaceViewOnTouchListener.OnTouchAction() {
 		@Override
-		public void setZoom(float zoomAdjust) {
-			mCursorZoom = mSurfaceCursor.setZoom(mCursorZoom * zoomAdjust);
+		public void setZoom(View view, float zoomAdjust) {
+			if (view == mSurfaceCursor) {
+				mCursorZoom = mSurfaceCursor.setZoom(mCursorZoom * zoomAdjust);
+			} else if (view == mSurfaceGraph) {
+				mGraphZoom = mSurfaceGraph.setZoom(mGraphZoom * zoomAdjust);
+				if (mCompareGraph != null) {
+					mCompareGraph.setZoom(mGraphZoom);
+				}
+			} else if (view == mCompareGraph) {
+				mGraphZoom = mCompareGraph.setZoom(mGraphZoom * zoomAdjust);
+				mSurfaceGraph.setZoom(mGraphZoom);
+			}
 		}
 		@Override
-		public void movePosition(float positionAdjust) {
-			if (mStatus == Status.REPLAY || mStatus == Status.PAUSE) {
-				mPosition += positionAdjust;
-				mPosition = mSensorRecordTask.setPosition(mPosition);
+		public void movePosition(View view, float positionAdjust) {
+			if (view == mSurfaceCursor || view == mSurfaceGraph) {
+				if (mStatus == Status.REPLAY || mStatus == Status.PAUSE) {
+					mForcusCompareFlag = false;
+					mSurfaceCursor.setGsensorData(mGsensorData);
+					mSensorRecordTask.setPosition((int)(mSensorRecordTask.getPosition() + positionAdjust));
+				}
+			} else if (mCompareSensorTask != null && mCompareGraph != null && view == mCompareGraph) {
+				if (mStatus == Status.PAUSE) {
+					mForcusCompareFlag = true;
+					mSurfaceCursor.setGsensorData(mCompareSensorTask.getGsensorData());
+					mCompareSensorTask.setPosition((int)(mCompareSensorTask.getPosition() + positionAdjust));
+				}
 			}
 		}
 	};
-
-	/**
-	 * SurfaceGraphView上をタッチした時に行う画面上の動作を決める
-	 * setZoom:SurfaceGraphView画面の拡大・縮小
-	 * movePosition:再生（一時停止）状態なら再生位置を移動する
-	 */
-	private SurfaceViewOnTouchListener.OnTouchAction mGraphOnTouchAction = new SurfaceViewOnTouchListener.OnTouchAction() {
-		@Override
-		public void setZoom(float zoomAdjust) {
-			mGraphZoom = mSurfaceGraph.setZoom(mGraphZoom * zoomAdjust);
-		}
-		@Override
-		public void movePosition(float positionAdjust) {
-			if (mStatus == Status.REPLAY || mStatus == Status.PAUSE) {
-				mPosition += positionAdjust;
-				mPosition = mSensorRecordTask.setPosition(mPosition);
-			}
-		}
-	};
-
 	/**
 	 * Commander/MapViewをドラッグしたときに移動する
 	 */
@@ -396,20 +425,26 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		mLocationManager.requestLocationUpdates(mProvider, SENSOR_TASK_PERIOD, 0, mSensorRecordTask);
 
 		mSurfaceCursor.setZoom(mCursorZoom);
-		SurfaceViewOnTouchListener cursorListener = new SurfaceViewOnTouchListener(mSurfaceCursor, mCursorOnTouchAction);
+		SurfaceViewOnTouchListener cursorListener = new SurfaceViewOnTouchListener(mSurfaceCursor, mOnTouchAction);
 		mSurfaceCursor.setOnTouchListener(cursorListener);
 
 		mSurfaceGraph.setZoom(mGraphZoom);
-		SurfaceViewOnTouchListener graphListener = new SurfaceViewOnTouchListener(mSurfaceGraph, mGraphOnTouchAction);
+		SurfaceViewOnTouchListener graphListener = new SurfaceViewOnTouchListener(mSurfaceGraph, mOnTouchAction);
 		mSurfaceGraph.setOnTouchListener(graphListener);
 
 		mSensorRecordTask.execute();
+		if (mCompareSensorTask != null) {
+			mCompareSensorTask.execute();
+		}
 	}
 
 	@Override
 	protected void onPause() {
 		Log.d(TAG, "onPause");
 		super.onPause();
+		if (mCompareSensorTask != null) {
+			mCompareSensorTask.cancel();
+		}
 		mSensorRecordTask.cancel();
 		mSensorManager.unregisterListener(mSensorRecordTask);
 		mLocationManager.removeUpdates(mSensorRecordTask);
@@ -452,9 +487,9 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	 */
 	private void moveStatusREC() {
 		if ((mStatus = mSensorRecordTask.setStatus(Status.REC)) == Status.REC) {
-			mPosition = 0;
 			mGsensorData = mSensorRecordTask.getGsensorData();
 			mGsensorData.setUserName(mUserName);
+			mGsensorData.isSaved = false;
 			mDrawTracksFlag = mSurfaceCursor.enableTracks(true);
 
 			mSurfaceGraph.setGraphAlign(Graph.Align.RIGHT);
@@ -469,12 +504,13 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	 */
 	private void moveStatusREPLAY() {
 		if ((mStatus = mSensorRecordTask.setStatus(Status.REPLAY)) == Status.REPLAY) {
-			mPosition = 0;
 			mDrawTracksFlag = mSurfaceCursor.enableTracks(true);
-
 			mSurfaceGraph.setGraphAlign(Graph.Align.CENTER);
 			mDrawGraphFlag = mSurfaceGraph.enableDrawGraph(true);
-
+			if (mCompareSensorTask != null && mCompareGraph != null) {
+				mCompareSensorTask.setStatus(Status.REPLAY);
+				mCompareGraph.enableDrawGraph(true);
+			}
 			mReplayBtn.setImageBitmap(mButtonsBitmap.replay_green);
 		}
 	}
@@ -485,10 +521,17 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	private void toggleStatusREPLAYorPAUSE() {
 		if (mStatus == Status.REPLAY) {
 			if ((mStatus = mSensorRecordTask.setStatus(Status.PAUSE)) == Status.PAUSE) {
+				if (mCompareSensorTask != null) {
+					mCompareSensorTask.setStatus(Status.PAUSE);
+				}
 				mReplayBtn.setImageBitmap(mButtonsBitmap.pause_green);
 			}
 		} else if (mStatus == Status.PAUSE) {
 			if ((mStatus = mSensorRecordTask.setStatus(Status.REPLAY)) == Status.REPLAY) {
+				if (mCompareSensorTask != null) {
+					mForcusCompareFlag = false;
+					mCompareSensorTask.setStatus(Status.REPLAY);
+				}
 				mReplayBtn.setImageBitmap(mButtonsBitmap.replay_green);
 			}
 		}
@@ -501,12 +544,17 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	private void moveStatusSTOP () {
 		SensorRecordTask.Status beforStatus = mStatus;
 		if ((mStatus = mSensorRecordTask.setStatus(Status.IDLE)) == Status.IDLE) {
-			mPosition = 0;
 			mDrawTracksFlag = mSurfaceCursor.enableTracks(false);
-			mSurfaceCursor.setTimestamp(mGsensorData.getTimeStamp(mPosition));
-
-			mDrawGraphFlag = mSurfaceGraph.enableDrawGraph(false);
-
+			mSurfaceCursor.setTimestamp(mGsensorData.getTimeStamp(0));
+			if (mGsensorData.getSize() > 0) {
+				mDrawGraphFlag = mSurfaceGraph.enableDrawGraph(true);
+			} else {
+				mDrawGraphFlag = mSurfaceGraph.enableDrawGraph(false);
+			}
+			if (mCompareSensorTask != null && mCompareGraph != null) {
+				mCompareSensorTask.setStatus(Status.IDLE);
+				mCompareGraph.enableDrawGraph(true);
+			}
 			mRecBtn.setImageBitmap(mButtonsBitmap.rec_white);
 			mReplayBtn.setImageBitmap(mButtonsBitmap.replay_white);
 			switch (beforStatus) {
@@ -602,6 +650,40 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 				file_load(mSDCardPath);
 			}
 			return true;
+		case R.id.action_select_compare:
+			if (mCompareSensorTask == null) {
+				mCompareSensorTask = new SensorRecordTask(SENSOR_TASK_PERIOD, mCompareListener);
+			}
+			select_compare(mSDCardPath);
+			if (mCompareGraph != null) {
+				mCompareGraph.setPosition(mCompareSensorTask.getPosition());
+			}
+			return true;
+		case R.id.action_toggle_compare:
+			if (mCompareSensorTask != null) {
+				if (mCompareGraph == null) {
+					mCompareGraph = new SurfaceGraph(mThisActivity);
+					SurfaceViewOnTouchListener compareListener = new SurfaceViewOnTouchListener(mCompareGraph, mOnTouchAction);
+					mCompareGraph.setOnTouchListener(compareListener);
+					mCompareGraph.setGraphAlign(Align.CENTER);
+					mCompareSensorTask.setSurfaceGraph(mCompareGraph);
+					mCompareGraph.setPosition(mCompareSensorTask.getPosition());
+					mCompareGraph.enableDrawGraph(true);
+					mCompareSensorTask.execute();
+					int height = mSurfaceGraph.getHeight();
+					mSurfaceLayout.addView(mCompareGraph, 0, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+				} else {
+					mCompareSensorTask.cancel();
+					mSurfaceLayout.removeAllViews();
+					mSurfaceLayout.addView(mSurfaceGraph);
+					mSurfaceLayout.addView(mSurfaceCursor);
+					mCompareGraph = null;
+				}
+			} else {
+				ConfirmationDialog dialog = new ConfirmationDialog(mThisActivity, "比較データを選択してください", null);
+				dialog.show();
+			}
+			return true;
 		default:
 			break;
 		}
@@ -671,6 +753,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 							}
 							mUserName = selected;
 							mGsensorData.setUserName(selected);
+							mGsensorData.isSaved = false;
 							mSurfaceCursor.setUserName(selected);
 						}
 					};
@@ -683,6 +766,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 				} else {
 					mUserName = selected;
 					mGsensorData.setUserName(selected);
+					mGsensorData.isSaved = false;
 					mSurfaceCursor.setUserName(selected);
 				}
 			}
@@ -739,6 +823,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 						}
 						mGsensorData = mSensorRecordTask.getGsensorData();
 						mSurfaceCursor.setTimestamp(mGsensorData.getTimeStamp(0));
+						mSurfaceGraph.enableDrawGraph(true);
 						Toast.makeText(mThisActivity, selected + "から読込ました", Toast.LENGTH_LONG).show();
 					}
 
@@ -760,6 +845,39 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		};
 		mFileNameList = setupFileNameList(sdcard);
 		NameSelectDialog selectDialog = new NameSelectDialog(mThisActivity, "File Load", mFileNameList, selectedListener);
+		selectDialog.show();
+	}
+
+	private void select_compare(final File sdcard) {
+		NameSelectDialog.SelectedListener selectedListener = new NameSelectDialog.SelectedListener() {
+			@Override
+			public void onSelected(final String selected) {
+				final String filename = selected;
+				final File fromFile = new File(sdcard, filename + FILE_EXTENSION);
+				FileIOPostHandler handler = new FileIOPostHandler() {
+					@Override
+					public void onSuccess() {
+						Toast.makeText(mThisActivity, selected + "から読込ました", Toast.LENGTH_LONG).show();
+					}
+
+					@Override
+					public void onFailure(String errMessage) {
+						String msg = selected + "の読込に失敗しました。\n" + errMessage;
+						ConfirmationDialog dialog = new ConfirmationDialog(mThisActivity, msg, null);
+						dialog.show();
+					}
+				};
+				FileIOAsyncTask loadTask = new FileIOAsyncTask(mThisActivity, handler) {
+					@Override
+					boolean backgroundTask() throws Exception {
+						return mCompareSensorTask.loadFromFile(fromFile, filename);
+					}
+				};
+				loadTask.execute();
+			}
+		};
+		mFileNameList = setupFileNameList(sdcard);
+		NameSelectDialog selectDialog = new NameSelectDialog(mThisActivity, "Select Compare data", mFileNameList, selectedListener);
 		selectDialog.show();
 	}
 }

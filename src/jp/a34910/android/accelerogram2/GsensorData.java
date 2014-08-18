@@ -93,7 +93,6 @@ public class GsensorData {
 	public void setUserName(String username) {
 		if (this.mUserName.equals(username) == false) {
 			this.mUserName = username;
-			this.isSaved = false;
 		}
 	}
 

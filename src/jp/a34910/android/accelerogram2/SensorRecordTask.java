@@ -108,6 +108,10 @@ public class SensorRecordTask extends PeriodicTask implements SensorEventListene
 		return mPosition;
 	}
 
+	public int getPosition() {
+		return this.mPosition;
+	}
+
 	/**
 	 * 現在保持しているGsensorDataをファイルに保存する
 	 * @param toFile 保存するファイル
@@ -258,6 +262,10 @@ public class SensorRecordTask extends PeriodicTask implements SensorEventListene
 				}
 				mStatus = Status.REPLAY;
 			} else if (mStatus == Status.PAUSE) {
+				if (mSurfaceCursor != null) {
+					mSurfaceCursor.setGsensorData(mGsensorData);
+					mSurfaceCursor.setCursorPosition(mPosition);
+				}
 				mStatus = Status.REPLAY;
 			}
 			break;

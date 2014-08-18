@@ -71,7 +71,7 @@ public class SurfaceViewOnTouchListener implements OnTouchListener {
 					if (x < 0) {
 						adjust = -adjust;
 					}
-					mOntouchAction.movePosition(adjust);
+					mOntouchAction.movePosition(mTargetView, adjust);
 					moveX = event.getX(0);
 					moveY = event.getY(0);
 				}
@@ -84,7 +84,7 @@ public class SurfaceViewOnTouchListener implements OnTouchListener {
 					} else if (zoomAdjust < 0.9f) {
 						zoomAdjust = 0.9f;
 					}
-					mOntouchAction.setZoom((float)zoomAdjust);
+					mOntouchAction.setZoom(mTargetView, (float)zoomAdjust);
 				}
 				break;
 			case MotionEvent.ACTION_UP:
@@ -103,7 +103,7 @@ public class SurfaceViewOnTouchListener implements OnTouchListener {
 	 *
 	 */
 	public interface OnTouchAction {
-		public void setZoom(float zoomAdjust);
-		public void movePosition(float positionAdjust);
+		public void setZoom(View view, float zoomAdjust);
+		public void movePosition(View view, float positionAdjust);
 	}
 }
