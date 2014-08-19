@@ -219,7 +219,7 @@ public class SurfaceCursor extends SurfaceView implements SurfaceHolder.Callback
 	private class DrawSurfaceTask extends PeriodicTask {
 		private final float STROKE = 1.5f;
 		private Paint axisPaint;
-		private Paint latticePaint;
+		private Paint scalePaint;
 		private Paint circlePaint;
 		private Paint textPaint;
 		private Paint framePaint;
@@ -240,10 +240,10 @@ public class SurfaceCursor extends SurfaceView implements SurfaceHolder.Callback
 			axisPaint.setColor(Color.BLUE);
 			axisPaint.setAntiAlias(true);
 
-			latticePaint = new Paint();
-			latticePaint.setStrokeWidth(STROKE);
-			latticePaint.setColor(Color.CYAN);
-			latticePaint.setAntiAlias(true);
+			scalePaint = new Paint();
+			scalePaint.setStrokeWidth(STROKE);
+			scalePaint.setColor(Color.CYAN);
+			scalePaint.setAntiAlias(true);
 
 			circlePaint = new Paint();
 			circlePaint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -298,21 +298,23 @@ public class SurfaceCursor extends SurfaceView implements SurfaceHolder.Callback
 		 * 背景モードによってSQUARE/CIRCLEの背景を描画する
 		 */
 		private void drawBackground() {
-			float step = mStep * mZoom;
-			int indexMax = (int) (12 * (1 / mZoom));
-			textPaint.setTextSize(mWidth / 40);
+			final float step = mStep * mZoom;
+			final int indexMax = (int) (12 * (1 / mZoom));
+			final int fontsize = mWidth / 40;
+			textPaint.setTextSize(fontsize);
 			switch (mCursorBackground) {
 			case SQUARE:
 				mCursorCanvas.drawColor(Color.LTGRAY);
 				for (int index = 1; index <= indexMax; index++) {
-					mCursorCanvas.drawLine(0, mCenterY - (step * index), mWidth, mCenterY - (step * index), latticePaint);
-					mCursorCanvas.drawLine(0, mCenterY + (step * index), mWidth, mCenterY + (step * index), latticePaint);
-					mCursorCanvas.drawLine(mCenterX - (step * index), 0, mCenterX - (step * index), mHeight, latticePaint);
-					mCursorCanvas.drawLine(mCenterX + (step * index), 0, mCenterX + (step * index), mHeight, latticePaint);
-					mCursorCanvas.drawText("0." + index + "G", mCenterX, mCenterY + (step * index), textPaint);
-					mCursorCanvas.drawText("0." + index + "G", mCenterX, mCenterY - (step * index), textPaint);
-					mCursorCanvas.drawText("0." + index + "G", mCenterX + (step *index), mCenterY, textPaint);
-					mCursorCanvas.drawText("0." + index + "G", mCenterX - (step * index), mCenterY, textPaint);
+					mCursorCanvas.drawLine(0, mCenterY - (step * index), mWidth, mCenterY - (step * index), scalePaint);
+					mCursorCanvas.drawLine(0, mCenterY + (step * index), mWidth, mCenterY + (step * index), scalePaint);
+					mCursorCanvas.drawLine(mCenterX - (step * index), 0, mCenterX - (step * index), mHeight, scalePaint);
+					mCursorCanvas.drawLine(mCenterX + (step * index), 0, mCenterX + (step * index), mHeight, scalePaint);
+					String text = String.format(Locale.getDefault(), "%.1fG", (float) index /10);
+					mCursorCanvas.drawText(text, mCenterX, mCenterY + (step * index), textPaint);
+					mCursorCanvas.drawText(text, mCenterX, mCenterY - (step * index) + fontsize, textPaint);
+					mCursorCanvas.drawText(text, mCenterX + (step *index) - (fontsize * 2), mCenterY, textPaint);
+					mCursorCanvas.drawText(text, mCenterX - (step * index), mCenterY, textPaint);
 				}
 				break;
 			case CIRCLE:
@@ -330,8 +332,8 @@ public class SurfaceCursor extends SurfaceView implements SurfaceHolder.Callback
 					mCursorCanvas.drawCircle(mCenterX, mCenterY, step * index, circlePaint);
 					String text = String.format(Locale.getDefault(), "%.1fG", (float) index /10);
 					mCursorCanvas.drawText(text, mCenterX, mCenterY + (step * index), textPaint);
-					mCursorCanvas.drawText(text, mCenterX, mCenterY - (step * index), textPaint);
-					mCursorCanvas.drawText(text, mCenterX + (step *index), mCenterY, textPaint);
+					mCursorCanvas.drawText(text, mCenterX, mCenterY - (step * index) + fontsize, textPaint);
+					mCursorCanvas.drawText(text, mCenterX + (step *index) - (fontsize * 2), mCenterY, textPaint);
 					mCursorCanvas.drawText(text, mCenterX - (step * index), mCenterY, textPaint);
 				}
 				break;
