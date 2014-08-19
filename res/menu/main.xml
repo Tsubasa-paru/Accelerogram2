@@ -15,13 +15,17 @@
 	            android:title="@string/menu_comment"
 	            android:orderInCategory="101" />
 	        <item
+	            android:id="@+id/action_set_default_zoom"
+	            android:title="@string/menu_default_zoom"
+	            android:orderInCategory="102" />
+	        <item
 	            android:id="@+id/action_select_compare"
 	            android:title="@string/menu_select_compare"
-	            android:orderInCategory="102" />
+	            android:orderInCategory="103" />
 	        <item
 	            android:id="@+id/action_toggle_compare"
 	            android:title="@string/menu_toggle_compare"
-	            android:orderInCategory="103" />
+	            android:orderInCategory="104" />
 
 	    </menu>
 

@@ -251,7 +251,6 @@ public class SensorRecordTask extends PeriodicTask implements SensorEventListene
 			break;
 		case REPLAY:
 			if (mStatus == Status.IDLE) {
-				mPosition = 0;
 				if (mSurfaceCursor != null) {
 					mSurfaceCursor.setGsensorData(mGsensorData);
 					mSurfaceCursor.setCursorPosition(mPosition);

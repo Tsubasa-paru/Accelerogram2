@@ -12,6 +12,7 @@
     <string name="btn_calibration">Calibration</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_comment">Edit Comment</string>
+    <string name="menu_default_zoom">Set Default Zoom</string>
     <string name="menu_select_compare">Select Compare-Data</string>
     <string name="menu_toggle_compare">Toggle Compare-Data</string>
     <string name="menu_username">Select User</string>

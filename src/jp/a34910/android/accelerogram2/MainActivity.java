@@ -57,6 +57,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	static final String DEFAULT_FILENAME = "FileName";
 	static final String FILE_EXTENSION = ".zip";
 	static final String USER_EXTENSION = ".dir";
+	static final float DEFAULT_ZOOM = 3.0f;
 
 	static private ImageButton mRecBtn;
 	static private ImageButton mReplayBtn;
@@ -93,8 +94,8 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	private SensorRecordTask mCompareSensorTask = null;
 	private boolean mForcusCompareFlag = false;
 
-	private float mCursorZoom =3.0f;
-	private float mGraphZoom = 3.0f;
+	private float mCursorZoom =DEFAULT_ZOOM;
+	private float mGraphZoom = DEFAULT_ZOOM;
 
 	private Graph.Mode mGraphMode = Mode.OVERLAP;
 	private Cursor.Background mCursorBackground = Cursor.Background.CIRCLE;
@@ -676,6 +677,13 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 			} else {
 				ConfirmationDialog dialog = new ConfirmationDialog(mThisActivity, "比較データを選択してください", null);
 				dialog.show();
+			}
+			return true;
+		case R.id.action_set_default_zoom:
+			mCursorZoom = mSurfaceCursor.setZoom(DEFAULT_ZOOM);
+			mGraphZoom = mSurfaceGraph.setZoom(DEFAULT_ZOOM);
+			if (mCompareGraph != null) {
+				mCompareGraph.setZoom(DEFAULT_ZOOM);
 			}
 			return true;
 		default:
