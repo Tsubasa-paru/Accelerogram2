@@ -2,6 +2,7 @@
 
     <!--
     -->
+    <dimen name="graph_height">160dp</dimen>
     <dimen name="webview_width">250dp</dimen>
     <dimen name="webview_height">250dp</dimen>
     <dimen name="imagebtn_width">70dp</dimen>

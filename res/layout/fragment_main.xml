@@ -17,7 +17,7 @@
         <jp.a34910.android.accelerogram2.SurfaceGraph
             android:id="@+id/surfaceGraph"
             android:layout_width="match_parent"
-            android:layout_height="160dp" />
+            android:layout_height="@dimen/graph_height" />
 
         <jp.a34910.android.accelerogram2.SurfaceCursor
             android:id="@+id/surfaceCursor"

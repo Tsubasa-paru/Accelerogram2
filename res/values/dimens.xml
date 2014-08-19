@@ -3,6 +3,7 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">0dp</dimen>
     <dimen name="activity_vertical_margin">0dp</dimen>
+    <dimen name="graph_height">100dp</dimen>
     <dimen name="webview_width">150dp</dimen>
     <dimen name="webview_height">150dp</dimen>
     <dimen name="imagebtn_width">60dp</dimen>
