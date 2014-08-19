@@ -168,6 +168,7 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 		private Paint deceleratePaint;
 		private Paint lateralPaint;
 		private Paint composedPaint;
+		private Paint textPaint;
 
 		public DrawGraphTask(long period) {
 			super(period);
@@ -207,6 +208,11 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 			axisPaint.setColor(Color.YELLOW);
 			axisPaint.setAlpha(255);
 			axisPaint.setAntiAlias(true);
+
+			textPaint = new Paint();
+			textPaint.setColor(Color.YELLOW);
+			textPaint.setAlpha(255);
+			textPaint.setAntiAlias(true);
 		}
 
 		@Override
@@ -260,6 +266,17 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 					}
 					sfcanvas.drawColor(0, PorterDuff.Mode.CLEAR);
 					sfcanvas.drawBitmap(mGraphBitmap, src, dst, null);
+
+					final float fontsize = mWidth / 40;
+					final float text_x = fontsize;
+					final float text_y = fontsize;
+					StringBuilder draw_text = new StringBuilder(mGsensorData.getUserName());
+					if (mGsensorData.getSize() > 0) {
+						draw_text.append("\t" + mGsensorData.getFileName());
+					}
+					textPaint.setTextSize(fontsize);
+					sfcanvas.drawText(draw_text.toString(), text_x, text_y, textPaint);
+
 					mSurfaceHolder.unlockCanvasAndPost(sfcanvas);
 				}
 			}
