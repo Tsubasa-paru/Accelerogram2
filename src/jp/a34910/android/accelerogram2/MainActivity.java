@@ -125,10 +125,9 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		}
 		@Override
 		public void onPeriodicGsensor(PointF currentGsensor, int position) {
-			if (mDrawTracksFlag == false) {
+			if (mStatus == Status.IDLE) {
 				mSurfaceCursor.setCursorPosition(currentGsensor);
-			}
-			if (mStatus == Status.REPLAY || mStatus == Status.PAUSE) {
+			} else if (mStatus == Status.REPLAY || mStatus == Status.PAUSE) {
 				if (!mForcusCompareFlag) {
 					mSurfaceCursor.setCursorPosition(position);
 					mSurfaceCursor.setTimestamp(mGsensorData.getTimeStamp(position));
@@ -859,6 +858,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 				FileIOPostHandler handler = new FileIOPostHandler() {
 					@Override
 					public void onSuccess() {
+						mCompareGraph = showCompareGraph(true);
 						Toast.makeText(mThisActivity, selected + "から読込ました", Toast.LENGTH_LONG).show();
 					}
 
@@ -883,6 +883,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		selectDialog.show();
 	}
 
+	private final int GRAPH_POSI = 0;
 	/**
 	 * 比較用データグラフ表示のON/OFF
 	 * @param enable 表示許可
@@ -902,12 +903,14 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 				sfg.enableDrawGraph(true);
 				mCompareSensorTask.execute();
 				int height = mSurfaceGraph.getHeight();
-				mSurfaceLayout.addView(sfg, 0, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+				if (mCompareGraph != null) {
+					mSurfaceLayout.removeViewAt(GRAPH_POSI);
+				}
+				mSurfaceLayout.addView(sfg, GRAPH_POSI, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
 			} else {
 				mCompareSensorTask.cancel();
-				mSurfaceLayout.removeAllViews();
-				mSurfaceLayout.addView(mSurfaceGraph);
-				mSurfaceLayout.addView(mSurfaceCursor);
+				mSurfaceLayout.removeViewAt(GRAPH_POSI);
+				mSurfaceLayout.addView(mCompareGraph, GRAPH_POSI, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0));
 				sfg = null;
 			}
 		}
