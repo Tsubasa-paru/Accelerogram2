@@ -553,6 +553,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		if ((mStatus = mSensorRecordTask.setStatus(Status.IDLE)) == Status.IDLE) {
 			mDrawTracksFlag = mSurfaceCursor.enableTracks(false);
 			mSurfaceCursor.setTimestamp(mGsensorData.getTimeStamp(0));
+			mSurfaceGraph.setGraphAlign(Graph.Align.CENTER);
 			if (mGsensorData.getSize() > 0) {
 				mDrawGraphFlag = mSurfaceGraph.enableDrawGraph(true);
 			} else {
@@ -909,8 +910,10 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 				mSurfaceLayout.addView(sfg, GRAPH_POSI, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
 			} else {
 				mCompareSensorTask.cancel();
-				mSurfaceLayout.removeViewAt(GRAPH_POSI);
-				mSurfaceLayout.addView(mCompareGraph, GRAPH_POSI, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0));
+				if (mCompareGraph != null) {
+					mSurfaceLayout.removeViewAt(GRAPH_POSI);
+					mSurfaceLayout.addView(mCompareGraph, GRAPH_POSI, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0));
+				}
 				sfg = null;
 			}
 		}
