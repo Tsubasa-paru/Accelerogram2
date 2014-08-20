@@ -3,6 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="jp.a34910.android.accelerogram2.MainActivity" >
 
+    <item
+        android:id="@+id/action_useage"
+        android:title="@string/menu_useage"
+        android:icon="@android:drawable/ic_menu_help"
+        android:orderInCategory="300"
+        app:showAsAction="ifRoom" />
+
 	<item
 	    android:id="@+id/action_settings"
 	    android:title="@string/menu_settings"

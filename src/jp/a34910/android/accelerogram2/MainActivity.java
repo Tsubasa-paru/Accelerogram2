@@ -19,6 +19,9 @@ import android.text.InputFilter;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -73,6 +76,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	static private LinearLayout mCommanderView;
 
 	static private Activity mThisActivity;
+	private String versionName;
 	private int mScreenWidth;
 	private int mScreenHeight;
 	private File mSDCardPath;
@@ -177,6 +181,13 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		if (savedInstanceState == null) {
 			getSupportFragmentManager().beginTransaction()
 					.add(R.id.container, new PlaceholderFragment()).commit();
+		}
+		PackageManager packageManager = this.getPackageManager();
+		try {
+			PackageInfo packageInfo = packageManager.getPackageInfo(this.getPackageName(), PackageManager.GET_ACTIVITIES);
+			versionName = packageInfo.versionName;
+		} catch (NameNotFoundException e) {
+			e.printStackTrace();
 		}
 		mThisActivity = this;
 		mSensorManager = (SensorManager) mThisActivity.getSystemService(Context.SENSOR_SERVICE);
@@ -710,10 +721,24 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 				mCompareGraph.setZoom(DEFAULT_ZOOM);
 			}
 			return true;
+		case R.id.action_useage:
+			showUseage();
+			return true;
 		default:
 			break;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	private void showUseage() {
+		String app_name = getResources().getString(R.string.app_name);
+		WebView useageView = new WebView(mThisActivity);
+		useageView.loadUrl("file:///android_asset/useage.html");
+		ConfirmationDialog dialog = new ConfirmationDialog(mThisActivity);
+		dialog.setTitle(app_name + "(Ver." + versionName + ")について");
+		dialog.setView(useageView);
+		dialog.setOnConfirmListener("OK", null);
+		dialog.show();
 	}
 
 	/**
