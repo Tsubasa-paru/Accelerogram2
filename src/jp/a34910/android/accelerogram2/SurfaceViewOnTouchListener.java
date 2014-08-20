@@ -1,16 +1,21 @@
 package jp.a34910.android.accelerogram2;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.support.v4.view.GestureDetectorCompat;
 import android.util.Log;
+import android.view.GestureDetector.OnDoubleTapListener;
+import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 
 @SuppressLint("ClickableViewAccessibility")
-public class SurfaceViewOnTouchListener implements OnTouchListener {
+public class SurfaceViewOnTouchListener implements OnTouchListener, OnGestureListener,OnDoubleTapListener {
 	static private final String TAG = MainActivity.APP_NAME + "onTouchListener";
 	private View mTargetView;
-	private OnTouchAction mOntouchAction;
+	private OnTouchAction mOnTouchAction;
+	private GestureDetectorCompat mGestureDetector;
 
 	/**
 	 * onTouchのステートを定義
@@ -27,14 +32,26 @@ public class SurfaceViewOnTouchListener implements OnTouchListener {
 	private double originDistance = 0.0f;
 	private double zoomDistance = 0.0f;
 	private double moveDistance = 0.0f;
-	private double originX = 0.0f;
-	private double originY = 0.0f;
-	private double moveX = 0.0f;
-	private double moveY = 0.0f;
 
-	public SurfaceViewOnTouchListener(View view, OnTouchAction action) {
+	private final float FAST_MODE = 0.25f;
+//	private final float FINE_MODE = 0.1f;
+	private float moveMode = FAST_MODE;
+
+	/**
+	 * ZOOM/MOVE/SKIPを検出した時の動作を定義するInterface
+	 *
+	 */
+	public interface OnTouchAction {
+		public void setZoom(View view, float zoomAdjust);
+		public void movePosition(View view, float positionAdjust);
+		public void skipPosition(View view, float distance_from_center);
+	}
+
+	public SurfaceViewOnTouchListener(Context context, View view, OnTouchAction action) {
 		mTargetView = view;
-		mOntouchAction = action;
+		mOnTouchAction = action;
+		mGestureDetector = new GestureDetectorCompat(context, this);
+		mGestureDetector.setOnDoubleTapListener(this);
 	}
 
 	private double eventDistance(MotionEvent e) {
@@ -46,35 +63,17 @@ public class SurfaceViewOnTouchListener implements OnTouchListener {
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		if (v == mTargetView) {
-			Log.d(TAG, "onTouchEvent");
+			if (mGestureDetector.onTouchEvent(event)) {
+				return true;
+			}
 			switch (event.getActionMasked()) {
-			case MotionEvent.ACTION_DOWN:
-				touchState = TouchState.MOVE;
-				originX = event.getX(0);
-				originY = event.getY(0);
-				moveX = originX;
-				moveY = originY;
-				originDistance = 0.0f;
-				moveDistance = 0.0f;
-				break;
-			case MotionEvent.ACTION_POINTER_DOWN:
+			case MotionEvent.ACTION_POINTER_DOWN:// Second Touch
+				Log.d(TAG, "Change to ZOOM");
 				touchState = TouchState.ZOOM;
 				originDistance = eventDistance(event);
 				zoomDistance = 0.0f;
 				break;
 			case MotionEvent.ACTION_MOVE:
-				if (touchState == TouchState.MOVE) {
-					double x = moveX - event.getX(0);
-					double y = moveY - event.getY(0);
-					moveDistance = Math.sqrt(x * x + y * y);
-					float adjust = (float) (moveDistance * 0.25f);
-					if (x < 0) {
-						adjust = -adjust;
-					}
-					mOntouchAction.movePosition(mTargetView, adjust);
-					moveX = event.getX(0);
-					moveY = event.getY(0);
-				}
 				if (touchState == TouchState.ZOOM) {
 					zoomDistance = eventDistance(event);
 					double zoomAdjust = zoomDistance / originDistance;
@@ -84,12 +83,13 @@ public class SurfaceViewOnTouchListener implements OnTouchListener {
 					} else if (zoomAdjust < 0.9f) {
 						zoomAdjust = 0.9f;
 					}
-					mOntouchAction.setZoom(mTargetView, (float)zoomAdjust);
+					mOnTouchAction.setZoom(mTargetView, (float)zoomAdjust);
 				}
 				break;
 			case MotionEvent.ACTION_UP:
 				// fall through
 			case MotionEvent.ACTION_POINTER_UP:
+				Log.d(TAG, "Change to NONE");
 				touchState = TouchState.NONE;
 				break;
 			}
@@ -98,12 +98,72 @@ public class SurfaceViewOnTouchListener implements OnTouchListener {
 		return false;
 	}
 
-	/**
-	 * MOVE/ZOOMを検出した時の動作を定義するInterface
-	 *
-	 */
-	public interface OnTouchAction {
-		public void setZoom(View view, float zoomAdjust);
-		public void movePosition(View view, float positionAdjust);
+	@Override
+	public boolean onDown(MotionEvent event) {
+		Log.d(TAG, "Change to MOVE");
+		touchState = TouchState.MOVE;
+		originDistance = 0.0f;
+		moveDistance = 0.0f;
+		moveMode = FAST_MODE;
+		return true;
+	}
+
+	@Override
+	public void onShowPress(MotionEvent e) {
+		// Do nothing
+	}
+
+	@Override
+	public boolean onSingleTapUp(MotionEvent e) {
+		// Do nothing
+		return false;
+	}
+
+	@Override
+	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+		if (touchState == TouchState.MOVE) {
+			double x = distanceX;
+			double y = distanceY;
+			moveDistance = Math.sqrt(x * x + y * y);
+			float adjust = (float) (moveDistance * moveMode);
+			if (x < 0) {
+				adjust = -adjust;
+			}
+			mOnTouchAction.movePosition(mTargetView, adjust);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public void onLongPress(MotionEvent e) {
+		// Do nothing
+	}
+
+	@Override
+	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+		// Do nothing
+		return false;
+	}
+
+	@Override
+	public boolean onSingleTapConfirmed(MotionEvent e) {
+		// Do nothing
+		return false;
+	}
+
+	@Override
+	public boolean onDoubleTap(MotionEvent e) {
+		// DoubleTap検出時にSKIP
+		float distance_from_center = (mTargetView.getWidth() / 2 ) - e.getRawX();
+		mOnTouchAction.skipPosition(mTargetView, distance_from_center);
+		return true;
+	}
+
+	@Override
+	public boolean onDoubleTapEvent(MotionEvent e) {
+		// Do nothing
+		return false;
 	}
 }

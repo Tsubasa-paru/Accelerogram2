@@ -302,6 +302,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	 * SurfaceView上をタッチした時に行う画面上の動作を決める
 	 * setZoom:SurfaceView画面の拡大・縮小
 	 * movePosition:再生（一時停止）状態なら再生位置を移動する
+	 * skipPosition:再生（一時停止）状態なら再生位置をスキップする
 	 */
 	private SurfaceViewOnTouchListener.OnTouchAction mOnTouchAction = new SurfaceViewOnTouchListener.OnTouchAction() {
 		@Override
@@ -334,6 +335,29 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 					mForcusCompareFlag = true;
 					mSurfaceCursor.setGsensorData(mCompareSensorTask.getGsensorData());
 					mCompareSensorTask.setPosition((int)(mCompareSensorTask.getPosition() + positionAdjust));
+				}
+			}
+		}
+		@Override
+		public void skipPosition(View view, float distance_from_center) {
+			float adjust = 10 * (1000 / SENSOR_TASK_PERIOD);
+			if (distance_from_center > 0) {
+				adjust = -adjust;
+			}
+			if (view == mSurfaceCursor || view == mSurfaceGraph) {
+				if (mStatus == Status.REPLAY || mStatus == Status.PAUSE) {
+					mForcusCompareFlag = false;
+					mSurfaceCursor.setGsensorData(mGsensorData);
+					mSensorRecordTask.setPosition((int)(mSensorRecordTask.getPosition() + adjust));
+					if (mCompareSensorTask != null) {
+						mCompareSensorTask.setPosition((int)(mCompareSensorTask.getPosition() + adjust));
+					}
+				}
+			} else if (mCompareSensorTask != null && mCompareGraph != null && view == mCompareGraph) {
+				if (mStatus == Status.PAUSE) {
+					mForcusCompareFlag = true;
+					mSurfaceCursor.setGsensorData(mCompareSensorTask.getGsensorData());
+					mCompareSensorTask.setPosition((int)(mCompareSensorTask.getPosition() + adjust));
 				}
 			}
 		}
@@ -428,11 +452,11 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		mLocationManager.requestLocationUpdates(mProvider, SENSOR_TASK_PERIOD, 0, mSensorRecordTask);
 
 		mSurfaceCursor.setZoom(mCursorZoom);
-		SurfaceViewOnTouchListener cursorListener = new SurfaceViewOnTouchListener(mSurfaceCursor, mOnTouchAction);
+		SurfaceViewOnTouchListener cursorListener = new SurfaceViewOnTouchListener(mThisActivity, mSurfaceCursor, mOnTouchAction);
 		mSurfaceCursor.setOnTouchListener(cursorListener);
 
 		mSurfaceGraph.setZoom(mGraphZoom);
-		SurfaceViewOnTouchListener graphListener = new SurfaceViewOnTouchListener(mSurfaceGraph, mOnTouchAction);
+		SurfaceViewOnTouchListener graphListener = new SurfaceViewOnTouchListener(mThisActivity, mSurfaceGraph, mOnTouchAction);
 		mSurfaceGraph.setOnTouchListener(graphListener);
 
 		mSensorRecordTask.execute();
@@ -895,7 +919,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		if (mCompareSensorTask != null) {
 			if (enable) {
 				sfg = new SurfaceGraph(mThisActivity);
-				SurfaceViewOnTouchListener compareListener = new SurfaceViewOnTouchListener(sfg, mOnTouchAction);
+				SurfaceViewOnTouchListener compareListener = new SurfaceViewOnTouchListener(mThisActivity, sfg, mOnTouchAction);
 				sfg.setOnTouchListener(compareListener);
 				sfg.setGraphAlign(Align.CENTER);
 				sfg.setGraphMode(mGraphMode);
