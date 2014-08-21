@@ -46,6 +46,7 @@ import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -87,6 +88,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	static private boolean mDrawTracksFlag = false;
 	static private boolean mDrawGraphFlag = false;
 	static private boolean mMapViewVisibilityFlag = true;
+	static private boolean mMapViewLoadFinished = false;
 
 	static private SensorManager mSensorManager = null;
 	static private LocationManager mLocationManager = null;
@@ -450,6 +452,18 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 				Log.d(TAG, "Register G-Sensor Listener");
 			}
 		}
+		mMapView.setWebViewClient(new WebViewClient() {
+			@Override
+			public void onPageStarted(WebView view, String url, Bitmap favicon) {
+				Log.d(TAG, "onPageStarted: " + url);
+				mMapViewLoadFinished = false;
+			}
+			@Override
+			public void onPageFinished(WebView view, String url) {
+				Log.d(TAG, "onPageFinished: " + url);
+				mMapViewLoadFinished = true;
+			}
+		});
 		mMapView.getSettings().setJavaScriptEnabled(true);
 		mMapView.loadUrl("file:///android_asset/map.html");
 		mMapView.setOnTouchListener(mDragMovingListener);
@@ -681,6 +695,9 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 			} else {
 				mMapView.setVisibility(View.VISIBLE);
 				mMapViewVisibilityFlag = true;
+				if (mMapViewLoadFinished == false) {
+					mMapView.loadUrl("file:///android_asset/map.html");
+				}
 			}
 			return true;
 		case R.id.action_save:
