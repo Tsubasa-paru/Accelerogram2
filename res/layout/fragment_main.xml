@@ -32,8 +32,7 @@
         android:layout_width="@dimen/webview_width"
         android:layout_height="@dimen/webview_height"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:background="@drawable/frame_shape" />
+        android:layout_alignParentRight="true" />
 
 	<ImageButton
 	    android:id="@+id/calibration_btn"
@@ -48,6 +47,8 @@
         android:id="@+id/commander_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
         android:gravity="center_vertical"
         android:background="@drawable/frame_shape" >
 
