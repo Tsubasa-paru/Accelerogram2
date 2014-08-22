@@ -260,6 +260,8 @@ public class GsensorData {
 	static private final String PROVIDER_TAG = "provider";
 	static private final String LATITUDE_TAG = "latitude";
 	static private final String LONGITUDE_TAG = "longitude";
+	static private final String BEARING_TAG= "bearing";
+	static private final String SPEED_TAG = "speed";
 
 	/**
 	 * XMLをパースしてG-sensor値、GPS情報等を読み込む
@@ -282,6 +284,8 @@ public class GsensorData {
 		String provider = "";
 		String latitude = "";
 		String longitude = "";
+		String bearing = "";
+		String speed = "";
 		for (int eventType = xmlparser.getEventType();
 				eventType != XmlPullParser.END_DOCUMENT;
 				eventType = xmlparser.next()) {
@@ -348,6 +352,10 @@ public class GsensorData {
 								latitude = value;
 							} else if (third_tag.equals(LONGITUDE_TAG)) {
 								longitude = value;
+							} else if (third_tag.equals(BEARING_TAG)) {
+								bearing = value;
+							} else if (third_tag.equals(SPEED_TAG)) {
+								speed = value;
 							}
 						}
 					}
@@ -376,6 +384,12 @@ public class GsensorData {
 							Location location = new Location(provider);
 							location.setLatitude(Double.valueOf(latitude));
 							location.setLongitude(Double.valueOf(longitude));
+							if (bearing.length() > 0) {
+								location.setBearing(Float.valueOf(bearing));
+							}
+							if (speed.length() > 0) {
+								location.setSpeed(Float.valueOf(speed));
+							}
 							this.add(gsensor, location);
 						}
 						gsensor_x = "";
@@ -383,6 +397,8 @@ public class GsensorData {
 						provider = "";
 						latitude = "";
 						longitude = "";
+						bearing = "";
+						speed = "";
 					}
 					parameter = "";
 					value = "";
@@ -414,6 +430,8 @@ public class GsensorData {
 		Element providerTag = null;
 		Element latitudeTag = null;
 		Element longitudeTag = null;
+		Element bearingTag = null;
+		Element speedTag = null;
 		Text text = null;
 
 		DocumentBuilder dbuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -504,6 +522,14 @@ public class GsensorData {
 			text = document.createTextNode(String.valueOf(location.getLongitude()));
 			longitudeTag.appendChild(text);
 			gsensorTag.appendChild(longitudeTag);
+
+			bearingTag = document.createElement(BEARING_TAG);
+			bearingTag.appendChild(document.createTextNode(String.valueOf(location.getBearing())));
+			gsensorTag.appendChild(bearingTag);
+
+			speedTag = document.createElement(SPEED_TAG);
+			speedTag.appendChild(document.createTextNode(String.valueOf(location.getSpeed())));
+			gsensorTag.appendChild(speedTag);
 
 			Accelerogram.appendChild(gsensorTag);
 		}

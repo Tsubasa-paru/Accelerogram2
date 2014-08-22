@@ -120,12 +120,18 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	 *  onPeriodicGsensor:50ms毎のコールバック（G-sensorの情報を通知）
 	 */
 	private SensorRecordTask.SensorListener mSensorListener = new SensorRecordTask.SensorListener() {
+		private float mRotation = 0.0f;
 		@Override
 		public void onPeriodicLocation(Location location) {
 			if (!mForcusCompareFlag && mMapViewVisibilityFlag && location != null) {
 				double latitude = location.getLatitude();
 				double longitude = location.getLongitude();
+				if (location.getSpeed() >= 1.0f) {
+					mRotation = location.getBearing();
+					mMapView.loadUrl("javascript:setIconRotation(" + mRotation + ")");
+				}
 				mMapView.loadUrl("javascript:moveTo(" + latitude +"," + longitude + ")");
+//				Log.d(TAG, "Speed="+location.getSpeed());
 //				Log.d(TAG + ":onPeriodicLocation", "latitude:" + latitude + " / logitude:" + longitude);
 			}
 		}
@@ -150,11 +156,16 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	};
 
 	private SensorRecordTask.SensorListener mCompareListener = new SensorRecordTask.SensorListener() {
+		private float mRotation = 0.0f;
 		@Override
 		public void onPeriodicLocation(Location location) {
 			if (mForcusCompareFlag && mMapViewVisibilityFlag && location != null) {
 				double latitude = location.getLatitude();
 				double longitude = location.getLongitude();
+				if (location.getSpeed() >= 1.0f) {
+					mRotation = location.getBearing();
+					mMapView.loadUrl("javascript:setIconRotation(" + mRotation + ")");
+				}
 				mMapView.loadUrl("javascript:moveTo(" + latitude +"," + longitude + ")");
 //				Log.d(TAG + ":onPeriodicLocation", "latitude:" + latitude + " / logitude:" + longitude);
 			}
@@ -197,6 +208,8 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		mLocationManager = (LocationManager)mThisActivity.getSystemService(Context.LOCATION_SERVICE);
 		Criteria criteria = new Criteria();
 		criteria.setAccuracy(Criteria.ACCURACY_FINE);
+		criteria.setSpeedRequired(true);
+		criteria.setBearingRequired(true);
 		mProvider = mLocationManager.getBestProvider(criteria, true);
 
 		mSensorRecordTask = new SensorRecordTask(SENSOR_TASK_PERIOD, mSensorListener);
@@ -601,6 +614,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	private void moveStatusSTOP () {
 		SensorRecordTask.Status beforStatus = mStatus;
 		if ((mStatus = mSensorRecordTask.setStatus(Status.IDLE)) == Status.IDLE) {
+			mMapView.loadUrl("javascript:setDefaultIcon()");
 			mDrawTracksFlag = mSurfaceCursor.enableTracks(false);
 			mSurfaceCursor.setTimestamp(mGsensorData.getTimeStamp(0));
 			mSurfaceGraph.setGraphAlign(Graph.Align.CENTER);
