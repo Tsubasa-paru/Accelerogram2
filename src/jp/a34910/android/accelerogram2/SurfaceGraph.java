@@ -162,13 +162,16 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 	 */
 	private class DrawGraphTask extends PeriodicTask {
 		private final float STROKE = 1.5f;
+		private final int COLOR_RIGHT_GREEN = 0xff7cff00; //lawn-green
+		private final int COLOR_LEFT_GREEN = 0xff00ff7f; //spring-green
 		private Paint scalePaint;
 		private Paint axisPaint;
 		private Paint acceleratePaint;
 		private Paint deceleratePaint;
-		private Paint lateralPaint;
 		private Paint composedPaint;
 		private Paint textPaint;
+		private Paint rightPaint;
+		private Paint leftPaint;
 
 		public DrawGraphTask(long period) {
 			super(period);
@@ -189,10 +192,15 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 			deceleratePaint.setAlpha(128);
 			deceleratePaint.setAntiAlias(true);
 
-			lateralPaint = new Paint();
-			lateralPaint.setColor(Color.GREEN);
-			lateralPaint.setAlpha(128);
-			lateralPaint.setAntiAlias(true);
+			rightPaint = new Paint();
+			rightPaint.setColor(COLOR_RIGHT_GREEN);
+			rightPaint.setAlpha(128);
+			rightPaint.setAntiAlias(true);
+
+			leftPaint = new Paint();
+			leftPaint.setColor(COLOR_LEFT_GREEN);
+			leftPaint.setAlpha(128);
+			leftPaint.setAntiAlias(true);
 
 			composedPaint = new Paint();
 			composedPaint.setColor(Color.YELLOW);
@@ -301,10 +309,12 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 				float longitudinalG;
 				float lateralG;
 				Paint longitudinalPaint;
+				Paint lateralPaint;
 				float strokeWidth = xstep * 2f;
 				acceleratePaint.setStrokeWidth(strokeWidth);
 				deceleratePaint.setStrokeWidth(strokeWidth);
-				lateralPaint.setStrokeWidth(strokeWidth);
+				rightPaint.setStrokeWidth(strokeWidth);
+				leftPaint.setStrokeWidth(strokeWidth);
 				if (mGsensorData != null) {
 					size = mGsensorData.getSize();
 				} else {
@@ -327,6 +337,11 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 							longitudinalPaint = acceleratePaint;
 						} else {
 							longitudinalPaint = deceleratePaint;
+						}
+						if (lateralG >= 0) {
+							lateralPaint = rightPaint;
+						} else {
+							lateralPaint = leftPaint;
 						}
 						mGraphCanvas.drawLine(x, longitudinalG0, x, longitudinalG0 - (ystep * longitudinalG), longitudinalPaint);
 						mGraphCanvas.drawLine(x, lateralG0, x, lateralG0 + (ystep * lateralG), lateralPaint);
@@ -352,6 +367,11 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 						} else {
 							longitudinalPaint = deceleratePaint;
 						}
+						if (lateralG >= 0) {
+							lateralPaint = rightPaint;
+						} else {
+							lateralPaint = leftPaint;
+						}
 						mGraphCanvas.drawLine(center - x, longitudinalG0, center - x, longitudinalG0 - (ystep * longitudinalG), longitudinalPaint);
 						mGraphCanvas.drawLine(center - x, lateralG0, center - x, lateralG0 + (ystep * lateralG), lateralPaint);
 						if (mGsensorData == null) break;
@@ -367,6 +387,11 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 							longitudinalPaint = acceleratePaint;
 						} else {
 							longitudinalPaint = deceleratePaint;
+						}
+						if (lateralG >= 0) {
+							lateralPaint = rightPaint;
+						} else {
+							lateralPaint = leftPaint;
 						}
 						mGraphCanvas.drawLine(center + x, longitudinalG0, center + x, longitudinalG0 - (ystep * longitudinalG), longitudinalPaint);
 						mGraphCanvas.drawLine(center + x, lateralG0, center + x, lateralG0 + (ystep * lateralG), lateralPaint);
@@ -388,6 +413,11 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 							longitudinalPaint = acceleratePaint;
 						} else {
 							longitudinalPaint = deceleratePaint;
+						}
+						if (lateralG >= 0) {
+							lateralPaint = rightPaint;
+						} else {
+							lateralPaint = leftPaint;
 						}
 						mGraphCanvas.drawLine(x, longitudinalG0, x, longitudinalG0 - (ystep * longitudinalG), longitudinalPaint);
 						mGraphCanvas.drawLine(x, lateralG0, x, lateralG0 + (ystep * lateralG), lateralPaint);
@@ -467,10 +497,12 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 				float longitudinalG;
 				float lateralG;
 				Paint longitudinalPaint;
+				Paint lateralPaint;
 				float strokeWidth = xstep * 2f;
 				acceleratePaint.setStrokeWidth(strokeWidth);
 				deceleratePaint.setStrokeWidth(strokeWidth);
-				lateralPaint.setStrokeWidth(strokeWidth);
+				rightPaint.setStrokeWidth(strokeWidth);
+				leftPaint.setStrokeWidth(strokeWidth);
 				composedPaint.setStrokeWidth(STROKE * (ZOOM_MAX / mZoom * 2));
 				if (mGsensorData != null) {
 					size = mGsensorData.getSize();
@@ -489,12 +521,18 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 							} else {
 								longitudinalPaint = deceleratePaint;
 							}
+							if (gsensor.x >= 0) {
+								lateralPaint = rightPaint;
+							} else {
+								lateralPaint = leftPaint;
+							}
 							longitudinalG = Math.abs(gsensor.y);
 							lateralG = Math.abs(gsensor.x);
 						} else {
 							longitudinalG = 0;
 							lateralG = 0;
 							longitudinalPaint = acceleratePaint;
+							lateralPaint = rightPaint;
 						}
 						mGraphCanvas.drawLine(x, g0, x, g0 - (ystep * longitudinalG), longitudinalPaint);
 						mGraphCanvas.drawLine(x, g0, x, g0 - (ystep * lateralG), lateralPaint);
@@ -515,12 +553,18 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 							} else {
 								longitudinalPaint = deceleratePaint;
 							}
+							if (gsensor.x >= 0) {
+								lateralPaint = rightPaint;
+							} else {
+								lateralPaint = leftPaint;
+							}
 							longitudinalG = Math.abs(gsensor.y);
 							lateralG = Math.abs(gsensor.x);
 						} else {
 							longitudinalG = 0;
 							lateralG = 0;
 							longitudinalPaint = acceleratePaint;
+							lateralPaint = rightPaint;
 						}
 						mGraphCanvas.drawLine(center - x, g0, center - x, g0 - (ystep * longitudinalG), longitudinalPaint);
 						mGraphCanvas.drawLine(center - x, g0, center - x, g0 - (ystep * lateralG), lateralPaint);
@@ -533,12 +577,18 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 							} else {
 								longitudinalPaint = deceleratePaint;
 							}
+							if (gsensor.x >= 0) {
+								lateralPaint = rightPaint;
+							} else {
+								lateralPaint = leftPaint;
+							}
 							longitudinalG = Math.abs(gsensor.y);
 							lateralG = Math.abs(gsensor.x);
 						} else {
 							longitudinalG = 0;
 							lateralG = 0;
 							longitudinalPaint = acceleratePaint;
+							lateralPaint = rightPaint;
 						}
 						mGraphCanvas.drawLine(center + x, g0, center + x, g0 - (ystep * longitudinalG), longitudinalPaint);
 						mGraphCanvas.drawLine(center + x, g0, center + x, g0 - (ystep * lateralG), lateralPaint);
@@ -556,12 +606,18 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 							} else {
 								longitudinalPaint = deceleratePaint;
 							}
+							if (gsensor.x >= 0) {
+								lateralPaint = rightPaint;
+							} else {
+								lateralPaint = leftPaint;
+							}
 							longitudinalG = Math.abs(gsensor.y);
 							lateralG = Math.abs(gsensor.x);
 						} else {
 							longitudinalG = 0;
 							lateralG = 0;
 							longitudinalPaint = acceleratePaint;
+							lateralPaint = rightPaint;
 						}
 						mGraphCanvas.drawLine(x, g0, x, g0 - (ystep * longitudinalG), longitudinalPaint);
 						mGraphCanvas.drawLine(x, g0, x, g0 - (ystep * lateralG), lateralPaint);
