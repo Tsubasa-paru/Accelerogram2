@@ -191,6 +191,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		} catch (NameNotFoundException e) {
 			e.printStackTrace();
 		}
+		getActionBar().setDisplayShowTitleEnabled(false);
 		mThisActivity = this;
 		mSensorManager = (SensorManager) mThisActivity.getSystemService(Context.SENSOR_SERVICE);
 		mLocationManager = (LocationManager)mThisActivity.getSystemService(Context.LOCATION_SERVICE);
