@@ -128,9 +128,11 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 				double longitude = location.getLongitude();
 				if (location.getSpeed() >= 1.0f) {
 					mRotation = location.getBearing();
-					mMapView.loadUrl("javascript:setIconRotation(" + mRotation + ")");
+					execJavascript("setIconRotation(" + mRotation + ")");
+				} else {
+//					execJavascript("setDefaultIcon()");
 				}
-				mMapView.loadUrl("javascript:moveTo(" + latitude +"," + longitude + ")");
+				execJavascript("moveTo(" + latitude +"," + longitude + ")");
 //				Log.d(TAG, "Speed="+location.getSpeed());
 //				Log.d(TAG + ":onPeriodicLocation", "latitude:" + latitude + " / logitude:" + longitude);
 			}
@@ -164,9 +166,11 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 				double longitude = location.getLongitude();
 				if (location.getSpeed() >= 1.0f) {
 					mRotation = location.getBearing();
-					mMapView.loadUrl("javascript:setIconRotation(" + mRotation + ")");
+					execJavascript("setIconRotation(" + mRotation + ")");
+				} else {
+//					execJavascript("setDefaultIcon()");
 				}
-				mMapView.loadUrl("javascript:moveTo(" + latitude +"," + longitude + ")");
+				execJavascript("moveTo(" + latitude +"," + longitude + ")");
 //				Log.d(TAG + ":onPeriodicLocation", "latitude:" + latitude + " / logitude:" + longitude);
 			}
 		}
@@ -184,6 +188,11 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		}
 	};
 
+	private void execJavascript(String script) {
+		if (mMapView != null && mMapViewLoadFinished) {
+			mMapView.loadUrl("javascript:" + script);
+		}
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -486,7 +495,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 			mSensorRecordTask.onLocationChanged(location);
 			double latitude = location.getLatitude();
 			double longitude = location.getLongitude();
-			mMapView.loadUrl("javascript:moveTo(" + latitude +"," + longitude + ")");
+			execJavascript("moveTo(" + latitude +"," + longitude + ")");
 		}
 		mLocationManager.requestLocationUpdates(mProvider, SENSOR_TASK_PERIOD, 0, mSensorRecordTask);
 
@@ -614,7 +623,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	private void moveStatusSTOP () {
 		SensorRecordTask.Status beforStatus = mStatus;
 		if ((mStatus = mSensorRecordTask.setStatus(Status.IDLE)) == Status.IDLE) {
-			mMapView.loadUrl("javascript:setDefaultIcon()");
+			execJavascript("setDefaultIcon()");
 			mDrawTracksFlag = mSurfaceCursor.enableTracks(false);
 			mSurfaceCursor.setTimestamp(mGsensorData.getTimeStamp(0));
 			mSurfaceGraph.setGraphAlign(Graph.Align.CENTER);
