@@ -130,7 +130,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 					mRotation = location.getBearing();
 					execJavascript("setIconRotation(" + mRotation + ")");
 				} else {
-//					execJavascript("setDefaultIcon()");
+					execJavascript("setDefaultIcon()");
 				}
 				execJavascript("moveTo(" + latitude +"," + longitude + ")");
 //				Log.d(TAG, "Speed="+location.getSpeed());
@@ -168,7 +168,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 					mRotation = location.getBearing();
 					execJavascript("setIconRotation(" + mRotation + ")");
 				} else {
-//					execJavascript("setDefaultIcon()");
+					execJavascript("setDefaultIcon()");
 				}
 				execJavascript("moveTo(" + latitude +"," + longitude + ")");
 //				Log.d(TAG + ":onPeriodicLocation", "latitude:" + latitude + " / logitude:" + longitude);
