@@ -55,7 +55,7 @@ html, body {height:100%; margin:0px; padding:0px;}
 		};
 	}
 
-	function moveTo(latitude, longitude, rotation) {
+	function moveTo(latitude, longitude) {
 		var newLatLng = new google.maps.LatLng(latitude, longitude);
 		mMap.panTo(newLatLng);
 		mMarker.setPosition(newLatLng);

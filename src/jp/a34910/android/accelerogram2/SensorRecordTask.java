@@ -38,8 +38,8 @@ public class SensorRecordTask extends PeriodicTask implements SensorEventListene
 	private SensorRecordTask.SensorListener mSensorListener;
 	private LPFilter mLPFilter;
 	private Location mReplayLocation;
-	private long mCount1sec = 0;
-	private long mCount1secMax;
+	private long mCount = 0;
+	private long mCount500msec;
 	private SurfaceCursor mSurfaceCursor = null;
 	private SurfaceGraph mSurfaceGraph = null;
 
@@ -64,7 +64,7 @@ public class SensorRecordTask extends PeriodicTask implements SensorEventListene
 		this.mSensorListener = listener;
 		this.mLPFilter = new LPFilter(mPeriod);
 		this.mLPFilter.setFcutoff(1.0f);
-		this.mCount1secMax = 1000 / mPeriod;
+		this.mCount500msec = 500 / mPeriod;
 		this.mSurfaceCursor = null;
 		this.mSurfaceGraph = null;
 	}
@@ -293,14 +293,14 @@ public class SensorRecordTask extends PeriodicTask implements SensorEventListene
 		default:
 			break;
 		}
-		Log.d(TAG, "mStatus is" + mStatus);
+		Log.d(TAG, "Status : " + mStatus);
 		return mStatus;
 	}
 
 	@Override
 	protected void periodicTaskOnUIThread() {
-		if (mCount1sec++ >= mCount1secMax) {
-			mCount1sec = 0;
+		if (mCount++ >= mCount500msec) {
+			mCount = 0;
 			switch (mStatus) {
 			case REPLAY:
 			case PAUSE:

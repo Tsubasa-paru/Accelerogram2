@@ -18,7 +18,9 @@ import android.support.v4.app.Fragment;
 import android.text.InputFilter;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -116,7 +118,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	private ButtonsBitmap mButtonsBitmap;
 	/**
 	 *  G-sensor/GPSの記録（再生）結果を画面に反映させるためのListener
-	 *  onPeriodicLocation:1秒毎のコールバック（GPS位置情報を通知）
+	 *  onPeriodicLocation:500ms毎のコールバック（GPS位置情報を通知）
 	 *  onPeriodicGsensor:50ms毎のコールバック（G-sensorの情報を通知）
 	 */
 	private SensorRecordTask.SensorListener mSensorListener = new SensorRecordTask.SensorListener() {
@@ -134,7 +136,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 				}
 				execJavascript("moveTo(" + latitude +"," + longitude + ")");
 //				Log.d(TAG, "Speed="+location.getSpeed());
-//				Log.d(TAG + ":onPeriodicLocation", "latitude:" + latitude + " / logitude:" + longitude);
+//				Log.d(TAG + ":onPeriodicLocation", "latitude:" + latitude + " / longitude:" + longitude);
 			}
 		}
 		@Override
@@ -171,7 +173,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 					execJavascript("setDefaultIcon()");
 				}
 				execJavascript("moveTo(" + latitude +"," + longitude + ")");
-//				Log.d(TAG + ":onPeriodicLocation", "latitude:" + latitude + " / logitude:" + longitude);
+//				Log.d(TAG + ":onPeriodicLocation", "latitude:" + latitude + " / longitude:" + longitude);
 			}
 		}
 		@Override
@@ -215,11 +217,6 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		mThisActivity = this;
 		mSensorManager = (SensorManager) mThisActivity.getSystemService(Context.SENSOR_SERVICE);
 		mLocationManager = (LocationManager)mThisActivity.getSystemService(Context.LOCATION_SERVICE);
-		Criteria criteria = new Criteria();
-		criteria.setAccuracy(Criteria.ACCURACY_FINE);
-		criteria.setSpeedRequired(true);
-		criteria.setBearingRequired(true);
-		mProvider = mLocationManager.getBestProvider(criteria, true);
 
 		mSensorRecordTask = new SensorRecordTask(SENSOR_TASK_PERIOD, mSensorListener);
 
@@ -268,6 +265,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 			mToggleGraphBtn = (ImageButton)rootView.findViewById(R.id.gmode_btn);
 			mMapView = (WebView)rootView.findViewById(R.id.map_view);
 			mSurfaceLayout = (LinearLayout)rootView.findViewById(R.id.surfaceLayout);
+			mMapView.clearCache(true);
 			return rootView;
 		}
 	}
@@ -441,6 +439,8 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		}
 	};
 
+	static private final double TOKYO_STATION_LATITUDE = 35.680865;
+	static private final double TOKYO_STATION_LONGITUDE = 139.767036;
 	@SuppressLint("SetJavaScriptEnabled")
 	@Override
 	protected void onResume() {
@@ -490,13 +490,25 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		mMapView.getSettings().setJavaScriptEnabled(true);
 		mMapView.loadUrl("file:///android_asset/map.html");
 		mMapView.setOnTouchListener(mDragMovingListener);
-		if (mLocationManager.getLastKnownLocation(mProvider) != null) {
-			Location location = mLocationManager.getLastKnownLocation(mProvider);
-			mSensorRecordTask.onLocationChanged(location);
-			double latitude = location.getLatitude();
-			double longitude = location.getLongitude();
-			execJavascript("moveTo(" + latitude +"," + longitude + ")");
+
+		Criteria criteria = new Criteria();
+		criteria.setAccuracy(Criteria.ACCURACY_FINE);
+		criteria.setSpeedRequired(true);
+		criteria.setBearingRequired(true);
+		mProvider = mLocationManager.getBestProvider(criteria, true);
+		if (mProvider.equals("passive")) {
+			try {
+				startActivity(new Intent("android.settings.LOCATION_SOURCE_SETTINGS"));
+			} catch (ActivityNotFoundException e) {
+			}
 		}
+		Location currentLocation = mLocationManager.getLastKnownLocation(mProvider);
+		if (currentLocation == null) {
+			currentLocation = new Location(mProvider);
+			currentLocation.setLatitude(TOKYO_STATION_LATITUDE);
+			currentLocation.setLongitude(TOKYO_STATION_LONGITUDE);
+		}
+		mSensorRecordTask.onLocationChanged(currentLocation);
 		mLocationManager.requestLocationUpdates(mProvider, SENSOR_TASK_PERIOD, 0, mSensorRecordTask);
 
 		mSurfaceCursor.setZoom(mCursorZoom);
@@ -883,6 +895,9 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 			@Override
 			public void onFailure(String errMessage) {
 				String msg = filename + "の保存に失敗しました。\n" + errMessage;
+				if (toFile.exists()) {
+					toFile.delete();
+				}
 				ConfirmationDialog dialog = new ConfirmationDialog(mThisActivity, msg, null);
 				dialog.show();
 			}
