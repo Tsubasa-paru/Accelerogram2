@@ -15,7 +15,7 @@
 	    android:title="@string/menu_settings"
 	    android:icon="@android:drawable/ic_menu_preferences"
 	    android:orderInCategory="100"
-	    app:showAsAction="ifRoom">
+	    app:showAsAction="always">
 	    <menu>
 	        <item
 	            android:id="@+id/action_comment"

@@ -497,10 +497,20 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		criteria.setBearingRequired(true);
 		mProvider = mLocationManager.getBestProvider(criteria, true);
 		if (mProvider.equals("passive")) {
-			try {
-				startActivity(new Intent("android.settings.LOCATION_SOURCE_SETTINGS"));
-			} catch (ActivityNotFoundException e) {
-			}
+			ConfirmationDialog dialog = new ConfirmationDialog(mThisActivity,
+					"位置情報の設定を確認してください。\n" +
+					"位置情報設定画面を開きますか？");
+			dialog.setOnConfirmListener("はい", new ConfirmationDialog.ConfirmedListener() {
+				@Override
+				public void onConfirmed(View view) {
+					try {
+						startActivity(new Intent("android.settings.LOCATION_SOURCE_SETTINGS"));
+					} catch (ActivityNotFoundException e) {
+					}
+				}
+			});
+			dialog.setOnDeniedListener("いいえ", null);
+			dialog.show();
 		}
 		Location currentLocation = mLocationManager.getLastKnownLocation(mProvider);
 		if (currentLocation == null) {
