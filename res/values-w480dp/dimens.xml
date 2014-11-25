@@ -7,4 +7,7 @@
     <dimen name="webview_height">250dp</dimen>
     <dimen name="imagebtn_width">70dp</dimen>
     <dimen name="imagebtn_height">50dp</dimen>
+    <dimen name="gsensor_mode_list_text_size">18dp</dimen>
+    <dimen name="gsensor_mode_list_padding">10dp</dimen>
+
 </resources>

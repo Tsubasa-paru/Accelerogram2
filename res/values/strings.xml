@@ -25,4 +25,9 @@
     <string name="menu_rename">Rename</string>
     <string name="menu_delete">Delete</string>
 
+    <string-array name="gsensor_mode_list">
+        <item>Horizontal</item>
+        <item>Vertical</item>
+    </string-array>
+
 </resources>

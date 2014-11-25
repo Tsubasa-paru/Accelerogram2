@@ -21,6 +21,7 @@ import android.util.Log;
 public class SensorRecordTask extends PeriodicTask implements SensorEventListener,LocationListener {
 	static private final String TAG = MainActivity.APP_NAME + "SensorRecordTask";
 	static private final long PERIOD = 50;
+	static private final float FCUTOFF = 1.0f;
 	private long mPeriod = PERIOD;
 	public enum Status {
 		IDLE,
@@ -29,7 +30,12 @@ public class SensorRecordTask extends PeriodicTask implements SensorEventListene
 		PAUSE,
 		CALIBRATION,
 	};
+	public enum SensorMode {
+		HORIZONTAL,
+		VERTICAL,
+	};
 	private Status mStatus = Status.IDLE;
+	private SensorMode mMode = SensorMode.HORIZONTAL;
 	private PointF mGsensor;
 	private PointF mCalibration = new PointF(0, 0);
 	private Location mLocation;
@@ -63,10 +69,20 @@ public class SensorRecordTask extends PeriodicTask implements SensorEventListene
 		this.mGsensor = new PointF(0, 0);
 		this.mSensorListener = listener;
 		this.mLPFilter = new LPFilter(mPeriod);
-		this.mLPFilter.setFcutoff(1.0f);
+		this.mLPFilter.setFcutoff(FCUTOFF);
 		this.mCount500msec = 500 / mPeriod;
 		this.mSurfaceCursor = null;
 		this.mSurfaceGraph = null;
+	}
+
+	public SensorMode setMode(SensorMode sensorMode) {
+		if (this.mMode != sensorMode) {
+			synchronized (mGsensor) {
+				this.mMode = sensorMode;
+				this.mLPFilter.setFcutoff(FCUTOFF);
+			}
+		}
+		return this.mMode;
 	}
 
 	/**
@@ -187,7 +203,11 @@ public class SensorRecordTask extends PeriodicTask implements SensorEventListene
 			accelero = event.values.clone();
 			synchronized (mGsensor) {
 				mGsensor.x = (accelero[0] / 9.8f) * 10;
-				mGsensor.y = (accelero[1] / 9.8f) * 10;
+				if (this.mMode == SensorMode.HORIZONTAL) {
+					mGsensor.y = (accelero[1] / 9.8f) * 10;
+				} else {
+					mGsensor.y = (-accelero[2] / 9.8f) * 10;
+				}
 			}
 			break;
 		default:

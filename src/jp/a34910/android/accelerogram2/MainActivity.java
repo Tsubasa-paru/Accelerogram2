@@ -10,10 +10,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jp.a34910.android.accelerogram2.SensorRecordTask.Status;
+import jp.a34910.android.accelerogram2.SensorRecordTask.SensorMode;
 import jp.a34910.android.accelerogram2.SurfaceCursor.Cursor;
 import jp.a34910.android.accelerogram2.SurfaceGraph.Graph;
 import jp.a34910.android.accelerogram2.SurfaceGraph.Graph.*;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.text.InputFilter;
 import android.annotation.SuppressLint;
@@ -49,9 +51,14 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
 @SuppressLint("ClickableViewAccessibility")
@@ -65,6 +72,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 	static final String USER_EXTENSION = ".dir";
 	static final float DEFAULT_ZOOM = 3.0f;
 
+	static private Spinner mGsensorModeListSpinner;
 	static private ImageButton mRecBtn;
 	static private ImageButton mReplayBtn;
 	static private ImageButton mStopBtn;
@@ -213,8 +221,39 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 		} catch (NameNotFoundException e) {
 			e.printStackTrace();
 		}
-		getActionBar().setDisplayShowTitleEnabled(false);
+
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayShowTitleEnabled(false);
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
 		mThisActivity = this;
+
+		 mGsensorModeListSpinner = new Spinner(mThisActivity, Spinner.MODE_DROPDOWN);
+		SpinnerAdapter gsensorModeListAdapter = ArrayAdapter.createFromResource(mThisActivity,
+				R.array.gsensor_mode_list,
+				R.layout.gsensor_mode_list_item);
+		mGsensorModeListSpinner.setAdapter(gsensorModeListAdapter);
+		mGsensorModeListSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				switch (position) {
+				case 0:
+					mSensorRecordTask.setMode(SensorMode.HORIZONTAL);
+					break;
+				case 1:
+					 mSensorRecordTask.setMode(SensorMode.VERTICAL);
+					 break;
+				}
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+				// TODO 自動生成されたメソッド・スタブ
+			}
+		});
+		actionBar.setCustomView(mGsensorModeListSpinner, new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT));
+		mGsensorModeListSpinner.setEnabled(true);
+
 		mSensorManager = (SensorManager) mThisActivity.getSystemService(Context.SENSOR_SERVICE);
 		mLocationManager = (LocationManager)mThisActivity.getSystemService(Context.LOCATION_SERVICE);
 
@@ -597,6 +636,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 
 			mCompareGraph = showCompareGraph(false);
 			mRecBtn.setImageBitmap(mButtonsBitmap.rec_red);
+			mGsensorModeListSpinner.setEnabled(false);
 		}
 	}
 
@@ -613,6 +653,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 				mCompareGraph.enableDrawGraph(true);
 			}
 			mReplayBtn.setImageBitmap(mButtonsBitmap.replay_green);
+			mGsensorModeListSpinner.setEnabled(false);
 		}
 	}
 
@@ -677,6 +718,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener,O
 				dialog.show();
 			default:
 			}
+			mGsensorModeListSpinner.setEnabled(true);
 		}
 	}
 
