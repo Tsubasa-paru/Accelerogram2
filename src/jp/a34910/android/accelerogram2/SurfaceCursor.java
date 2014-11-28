@@ -318,7 +318,7 @@ public class SurfaceCursor extends SurfaceView implements SurfaceHolder.Callback
 				}
 				break;
 			case CIRCLE:
-				mCursorCanvas.drawColor(Color.LTGRAY);
+				mCursorCanvas.drawColor(Color.BLACK);
 				for (int index = indexMax; index > 0; index--) {
 					int r = 200 - (24 * index);
 					int g = 200 - (24 * index);
