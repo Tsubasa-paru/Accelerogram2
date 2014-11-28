@@ -305,7 +305,7 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 			float lateralG0 = (float)height / 4.0f;
 
 			if (mGsensorData != null) {
-				int size;
+				int size = mGsensorData.getSize();
 				int index;
 				PointF gsensor;
 				float longitudinalG;
@@ -317,16 +317,10 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 				deceleratePaint.setStrokeWidth(strokeWidth);
 				right_turnPaint.setStrokeWidth(strokeWidth);
 				left_turnPaint.setStrokeWidth(strokeWidth);
-				if (mGsensorData != null) {
-					size = mGsensorData.getSize();
-				} else {
-					size = 0;
-				}
 				switch (mGraphAlign) {
 				case RIGHT:
 					index = mPosition;
 					for (float x = width; x >= 0; x -= xstep) {
-						if (mGsensorData == null) break;
 						if (index > 0 ) {
 							gsensor = mGsensorData.getGsensor(index--);
 							longitudinalG = gsensor.y;
@@ -355,7 +349,6 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 					for (float x = 0; x <= center; x += xstep, index++) {
 						int befor = mPosition - index;
 						int after = mPosition + index;
-						if (mGsensorData == null) break;
 						if (befor >= 0) {
 							gsensor = mGsensorData.getGsensor(befor);
 							longitudinalG = gsensor.y;
@@ -376,7 +369,6 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 						}
 						mGraphCanvas.drawLine(center - x, longitudinalG0, center - x, longitudinalG0 - (ystep * longitudinalG), longitudinalPaint);
 						mGraphCanvas.drawLine(center - x, lateralG0, center - x, lateralG0 + (ystep * lateralG), lateralPaint);
-						if (mGsensorData == null) break;
 						if (after < size) {
 							gsensor = mGsensorData.getGsensor(after);
 							longitudinalG = gsensor.y;
@@ -402,7 +394,6 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 				case LEFT:
 					index = mPosition;
 					for (float x = 0; x <= width ; x += xstep) {
-						if (mGsensorData == null) break;
 						if (index < size) {
 							gsensor = mGsensorData.getGsensor(index++);
 							longitudinalG = gsensor.y;
@@ -493,7 +484,7 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 			float g0 = (float)height;
 
 			if (mGsensorData != null) {
-				int size;
+				int size = mGsensorData.getSize();
 				int index;
 				PointF gsensor;
 				float longitudinalG;
@@ -506,16 +497,10 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 				deceleratePaint.setStrokeWidth(strokeWidth);
 				right_turnPaint.setStrokeWidth(strokeWidth);
 				left_turnPaint.setStrokeWidth(strokeWidth);
-				if (mGsensorData != null) {
-					size = mGsensorData.getSize();
-				} else {
-					size = 0;
-				}
 				switch (mGraphAlign) {
 				case RIGHT:
 					index = mPosition;
 					for (float x = width; x >= 0; x -= xstep) {
-						if (mGsensorData == null) break;
 						if (index > 0 ) {
 							gsensor = mGsensorData.getGsensor(index--);
 							if (gsensor.y >= 0) {
@@ -549,7 +534,6 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 					for (float x = 0; x <= center; x += xstep, index++) {
 						int befor = mPosition - index;
 						int after = mPosition + index;
-						if (mGsensorData == null) break;
 						if (befor >= 0) {
 							gsensor = mGsensorData.getGsensor(befor);
 							if (gsensor.y >= 0) {
@@ -575,7 +559,6 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 						mGraphCanvas.drawLine(center - x, g0, center - x, g0 - (ystep * longitudinalG), longitudinalPaint);
 						mGraphCanvas.drawLine(center - x, g0, center - x, g0 - (ystep * lateralG), lateralPaint);
 						mGraphCanvas.drawRect(center - x, g0 - (ystep * compositionG) - STROKE, center - x + xstep, g0 - (ystep * compositionG) + STROKE, compositionPaint);
-						if (mGsensorData == null) break;
 						if (after < size) {
 							gsensor = mGsensorData.getGsensor(after);
 							if (gsensor.y >= 0) {
@@ -606,7 +589,6 @@ public class SurfaceGraph extends SurfaceView implements SurfaceHolder.Callback 
 				case LEFT:
 					index = mPosition;
 					for (float x = 0; x <= width ; x += xstep) {
-						if (mGsensorData == null) break;
 						if (index < size) {
 							gsensor = mGsensorData.getGsensor(index++);
 							if (gsensor.y >= 0) {

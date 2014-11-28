@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -13,21 +12,22 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 import org.xmlpull.v1.XmlPullParser;
-
+import android.annotation.SuppressLint;
 import android.graphics.PointF;
 import android.location.Location;
 import android.util.Xml;
 
+@SuppressLint("UseValueOf")
 public class GsensorData {
 //	static private final String TAG = MainActivity.APP_NAME + "GsensorData";
 	static private final long PERIOD = 50;
 	private final int MINUTE10 = 60 * 10;
 
+	private Boolean atomicLock;
 	private ArrayList<PointF> mGsensorList;
 	private ArrayList<Location> mLocationList;
 	private PointF mCalibration;
@@ -51,18 +51,21 @@ public class GsensorData {
 	public GsensorData() {
 		this.mMilliSecond =  (int)PERIOD;
 		this.mDefaultSize = MINUTE10 * (1000 / this.mMilliSecond);
+		this.atomicLock = new Boolean(false);
 		this.setupGsensorData();
 	}
 
 	public GsensorData(long period) {
 		this.mMilliSecond = (int) period;
 		this.mDefaultSize = MINUTE10 * (1000 / this.mMilliSecond);
+		this.atomicLock = new Boolean(false);
 		this.setupGsensorData();
 	}
 
 	public GsensorData(int minute, long period) {
 		this.mMilliSecond = (int) period;
 		this.mDefaultSize = minute * (1000 / this.mMilliSecond);
+		this.atomicLock = new Boolean(false);
 		this.setupGsensorData();
 	}
 
@@ -70,12 +73,16 @@ public class GsensorData {
 	 * G-sensorオブジェクトの初期化
 	 */
 	public void setupGsensorData() {
-		this.mGsensorList = new ArrayList<PointF>(this.mDefaultSize);
-		this.mLocationList = new ArrayList<Location>(this.mDefaultSize);
-		this.mCalibration = new PointF(0, 0);
-		this.mPosition = 0;
-		this.isSaved = false;
-		this.getCalendar();
+		synchronized (this.atomicLock) {
+			this.atomicLock = true;
+			this.mPosition = 0;
+			this.mGsensorList = new ArrayList<PointF>(this.mDefaultSize);
+			this.mLocationList = new ArrayList<Location>(this.mDefaultSize);
+			this.mCalibration = new PointF(0, 0);
+			this.isSaved = false;
+			this.getCalendar();
+			this.atomicLock = false;
+		}
 	}
 
 	/**
@@ -122,9 +129,15 @@ public class GsensorData {
 	 * @return 追加後のデータのサイズ
 	 */
 	public int add(PointF gsensor, Location location) {
-		mGsensorList.add(gsensor);
-		mLocationList.add(location);
-		return this.mPosition++;
+		int position;
+		synchronized (this.atomicLock) {
+			this.atomicLock = true;
+			this.mGsensorList.add(gsensor);
+			mLocationList.add(location);
+			position = this.mPosition++;
+			this.atomicLock = false;
+		}
+		return position;
 	}
 
 	/**
@@ -141,14 +154,21 @@ public class GsensorData {
 	 * @return G-sensor値
 	 */
 	public PointF getGsensor(int position) {
-		if (this.mPosition == 0) {
-			return new PointF(0, 0);
+		PointF gsensor;
+		synchronized (this.atomicLock) {
+			this.atomicLock = true;
+			if (this.mPosition == 0) {
+				gsensor = new PointF(0, 0);
+			} else {
+				if (position >= this.mPosition) {
+					position = this.mPosition - 1;
+				}
+				PointF rawgsensor = mGsensorList.get(position);
+				gsensor = new PointF((rawgsensor.x - mCalibration.x), (rawgsensor.y - mCalibration.y));
+			}
+			this.atomicLock = false;
 		}
-		if (position >= this.mPosition) {
-			position = this.mPosition - 1;
-		}
-		PointF gsensor = mGsensorList.get(position);
-		return new PointF((gsensor.x - mCalibration.x), (gsensor.y - mCalibration.y));
+		return gsensor;
 	}
 
 	/**
@@ -157,13 +177,20 @@ public class GsensorData {
 	 * @return Location
 	 */
 	public Location getLocation(int position) {
-		if (this.mPosition == 0) {
-			return null;
+		Location location;
+		synchronized (this.atomicLock) {
+			this.atomicLock = true;
+			if (this.mPosition == 0) {
+				location =  null;
+			} else {
+				if (position >= this.mPosition) {
+					position = this.mPosition - 1;
+				}
+				location = mLocationList.get(position);
+			}
+			this.atomicLock = false;
 		}
-		if (position >= this.mPosition) {
-			position = this.mPosition - 1;
-		}
-		return mLocationList.get(position);
+		return location;
 	}
 
 	/**
